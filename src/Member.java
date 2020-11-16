@@ -1,4 +1,6 @@
-public class Member {
+import java.io.Serializable;
+
+public class Member implements Serializable {
     private String name;
     private int birthyear;
     private String phone;
@@ -31,5 +33,10 @@ public class Member {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    @Override
+    public String toString() {
+        return name + " (" + birthyear + ", " + phone + ")";
     }
 }

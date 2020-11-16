@@ -77,10 +77,10 @@ public class Book implements Serializable {
         return borrowedBy;
     }
 
-    public void setBorrowedBy(Member borrowedBy) throws BookNotBorrowableException {
+    public void setBorrowedBy(Member borrowedBy)/* throws BookNotBorrowableException */{ // TODO
         if (this.isBorrowable)
             this.borrowedBy = borrowedBy;
-        else
-            throw new BookNotBorrowableException("This book is not borrowable.");
+//        else
+//            throw new BookNotBorrowableException("This book is not borrowable.");
     }
 }

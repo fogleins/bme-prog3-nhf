@@ -1,3 +1,4 @@
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,25 +58,40 @@ public class BookData extends AbstractTableModel {
     }
 
     public void addBook(Author author, String title, int year, BookCategory category, String language, boolean borrowable) {
-        Book newBook = new Book(author, title, year, category, language, borrowable);
-        books.add(newBook);
+        books.add(new Book(author, title, year, category, language, borrowable));
         fireTableDataChanged();
     }
+
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex == 1 || columnIndex == 2 || columnIndex == 3 || columnIndex == 5;
+        return columnIndex != 0;
     }
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        Book selectedBook = books.get(rowIndex);
         if (columnIndex == 1)
-            books.get(rowIndex).setTitle((String) aValue);
+            selectedBook.setTitle((String) aValue);
         else if (columnIndex == 2)
-            books.get(rowIndex).setYear((Integer) aValue);
+            selectedBook.setYear((Integer) aValue);
         else if (columnIndex == 3)
-            books.get(rowIndex).setCategory((BookCategory.valueOf((String) aValue, "HU")));
-        else if (columnIndex == 5)
-            books.get(rowIndex).setBorrowable((Boolean) aValue);
+            selectedBook.setCategory((BookCategory.valueOf((String) aValue, "HU")));
+        else if (columnIndex == 5) {
+            if (selectedBook.getBorrowedBy() != null) {
+                int chosenOption = JOptionPane.showConfirmDialog(null, "A választott könyvet " +
+                        "kikölcsönözték. Szeretné nem kölcsönözhetővé állítani? A hozzárendelt kölcsönző eltűnik.",
+                        "A választott könyvet kikölcsönözték", JOptionPane.YES_NO_OPTION);
+                if (chosenOption == JOptionPane.YES_OPTION)
+                    selectedBook.setBorrowedBy(null);
+                else return;
+            }
+            selectedBook.setBorrowable((Boolean) aValue);
+            fireTableDataChanged();
+        }
+        else if (columnIndex == 6) {
+            if (selectedBook.isBorrowable())
+                selectedBook.setBorrowedBy((Member) aValue);
+        }
         fireTableCellUpdated(rowIndex, columnIndex);
     }
 }
