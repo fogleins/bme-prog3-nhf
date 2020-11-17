@@ -57,8 +57,16 @@ public class BookData extends AbstractTableModel {
         }
     }
 
-    public void addBook(Author author, String title, int year, BookCategory category, String language, boolean borrowable) {
-        books.add(new Book(author, title, year, category, language, borrowable));
+    public void addBook(Book book) throws MissingRequiredArgumentException {
+        if (book.getAuthor() == null || book.getYear() == 0 || book.getTitle().equals("") || book.getLanguage().equals(""))
+            throw new MissingRequiredArgumentException();
+        books.add(book);
+        fireTableDataChanged();
+    }
+
+    public void removeBook(Book book) throws BookNotFoundException {
+        if (!books.remove(book))
+            throw new BookNotFoundException();
         fireTableDataChanged();
     }
 
@@ -76,6 +84,8 @@ public class BookData extends AbstractTableModel {
             selectedBook.setYear((Integer) aValue);
         else if (columnIndex == 3)
             selectedBook.setCategory((BookCategory.valueOf((String) aValue, "HU")));
+        else if (columnIndex == 4)
+            selectedBook.setLanguage(((String) aValue).toLowerCase());
         else if (columnIndex == 5) {
             if (selectedBook.getBorrowedBy() != null) {
                 int chosenOption = JOptionPane.showConfirmDialog(null, "A választott könyvet " +
