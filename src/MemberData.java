@@ -1,12 +1,22 @@
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableColumn;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MemberData extends AbstractTableModel {
-    List<Member> members = new ArrayList<>();
-    JComboBox<Member> membersComboBox = new JComboBox<>();
+    List<Member> members;
+    JComboBox<Member> membersComboBox;
+
+    public MemberData() {
+        this.members = new ArrayList<>();
+        this.membersComboBox = new JComboBox<>(); // TODO: initComboBox() biztosan nem kell?
+    }
+
+    public MemberData(List<Member> members) {
+        this.members = members;
+        this.membersComboBox = new JComboBox<>();
+        initComboBox();
+    }
 
     @Override
     public int getColumnCount() {
@@ -47,14 +57,25 @@ public class MemberData extends AbstractTableModel {
         return String.class;
     }
 
-    public void addMember(String name, int birthyear, String phone) {
-        Member member = new Member(name, birthyear, phone);
-        members.add(member);
-        this.membersComboBox.addItem(member);
-        fireTableDataChanged();
+    private boolean listContains(Member member) {
+        for (Member m: members) {
+            if (m.getName().equals(member.getName()) && m.getBirthyear() == member.getBirthyear() && m.getPhone().equals(member.getPhone()))
+                return true;
+        }
+        return false;
     }
 
-    public void initComboBoxList() {
+    public void addMember(String name, int birthyear, String phone) { // TODO: JOptionPane
+        Member member = new Member(name, birthyear, phone);
+        if (!listContains(member)) {
+            members.add(member);
+            this.membersComboBox.addItem(member);
+            fireTableDataChanged();
+        }
+    }
+
+    private void initComboBox() {
+        this.membersComboBox = new JComboBox<>();
         for (Member member : this.members)
             this.membersComboBox.addItem(member);
     }

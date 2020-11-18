@@ -9,6 +9,8 @@ import java.util.List;
 
 public class ApplicationFrame extends JFrame {
 
+    private Library library;
+
     private BookData bookData;
     private AuthorData authorData;
     private MemberData memberData;
@@ -19,19 +21,14 @@ public class ApplicationFrame extends JFrame {
 
     private void saveData() {
         try {
-            ObjectOutputStream bookOutputStream = new ObjectOutputStream(new FileOutputStream("books.libdat"));
-            bookOutputStream.writeObject(bookData.books);
-            bookOutputStream.close();
-
-            ObjectOutputStream authorOutputStream = new ObjectOutputStream(new FileOutputStream("authors.libdat"));
-            authorOutputStream.writeObject(authorData.authors);
-            authorOutputStream.close();
-
-            ObjectOutputStream memberOutputStream = new ObjectOutputStream(new FileOutputStream("members.libdat"));
-            memberOutputStream.writeObject(memberData.members);
-            memberOutputStream.close();
+            library.books = bookData.books;
+            library.authors = authorData.authors;
+            library.members = memberData.members;
+            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("library.libdat"));
+            outputStream.writeObject(library);
+            outputStream.close();
         } catch (Exception ex) {
-            // ex.printStackTrace();
+            ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Hiba az adatok mentése során: A könyvek mentése sikertelen ("
                     + ex.getMessage() + ')', "Hiba az adatok mentése során", JOptionPane.ERROR_MESSAGE);
         }
@@ -54,7 +51,7 @@ public class ApplicationFrame extends JFrame {
         // a felhasználó által szerkeszthető komponensek létrehozása és panelhez adása
         JPanel input = new JPanel(new GridLayout(0, 1, 2, 2));
         JComboBox<Author> author = new JComboBox<>();
-        for (Author a : authorData.authors)
+        for (Author a : this.authorData.authors)
             author.addItem(a);
         JTextField title = new JTextField();
         JTextField year = new JTextField();
@@ -121,7 +118,7 @@ public class ApplicationFrame extends JFrame {
             int chosenOption = JOptionPane.showConfirmDialog(this, "Biztosan törli a kiválasztott könyvet?",
                     "Biztosan törli?", JOptionPane.YES_NO_OPTION);
             if (chosenOption == JOptionPane.YES_OPTION)
-                bookData.removeBook(book);
+                this.bookData.removeBook(book);
         } catch (BookNotFoundException notFoundException) {
             JOptionPane.showMessageDialog(this, "A megadott könyv nincs a tárolt könyvek között. " +
                     "A gyűjtemény nem került módosításra.", "A könyv nem található", JOptionPane.ERROR_MESSAGE);
@@ -140,39 +137,23 @@ public class ApplicationFrame extends JFrame {
 
         // adatok beolvasása a program indulásakor
         try {
-            try {
-                bookData = new BookData();
-                ObjectInputStream bookInputStream = new ObjectInputStream(new FileInputStream("books.libdat"));
-                bookData.books = (List<Book>) bookInputStream.readObject();
-                bookInputStream.close();
-            } catch (InvalidClassException e) {
-                bookData = new BookData();
-            }
-
-            try {
-                authorData = new AuthorData();
-                ObjectInputStream authorInputStream = new ObjectInputStream(new FileInputStream("authors.libdat"));
-                authorData.authors = (List<Author>) authorInputStream.readObject();
-                authorInputStream.close();
-            } catch (InvalidClassException e) {
-                authorData = new AuthorData();
-            }
-
-            try {
-                memberData = new MemberData();
-                ObjectInputStream memberInputStream = new ObjectInputStream(new FileInputStream("members.libdat"));
-                memberData.members = (List<Member>) memberInputStream.readObject();
-                memberInputStream.close();
-                memberData.initComboBoxList(); // a beolvasott adatokat hozzáadja a comboboxhoz TODO
-            } catch (InvalidClassException e) {
-                memberData = new MemberData();
-            }
+            this.library = new Library();
+            ObjectInputStream memberInputStream = new ObjectInputStream(new FileInputStream("library.libdat"));
+            this.library = (Library) memberInputStream.readObject();
+            memberInputStream.close();
+            this.bookData = new BookData(library.books);
+            this.authorData = new AuthorData(library.authors);
+            this.memberData = new MemberData(library.members);
+        } catch (InvalidClassException e) {
+            this.library = new Library();
+            e.printStackTrace(); // TODO: exception handling
         } catch (FileNotFoundException notFoundException) {
             JOptionPane.showMessageDialog(null, "A fájl nem található: "
                     + notFoundException.getMessage(), "A fájl nem található", JOptionPane.ERROR_MESSAGE);
-            bookData = new BookData();
-            authorData = new AuthorData();
-            memberData = new MemberData();
+            this.library = new Library();
+            this.bookData = new BookData();
+            this.authorData = new AuthorData();
+            this.memberData = new MemberData();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -276,7 +257,7 @@ public class ApplicationFrame extends JFrame {
         booksNorthPanel.add(showBorrowedBooksOnly);
 
         // keresés komponensei
-        JFormattedTextField searchBar = new JFormattedTextField("Keresés " + bookData.books.size() + " könyv között");
+        JFormattedTextField searchBar = new JFormattedTextField("Keresés " /*+ library.bookData.books.size() +*/ +" könyv között");
         booksNorthPanel.add(searchBar);
         JCheckBox searchAuthorToo = new JCheckBox("Keresés a szerzők nevében is");
         JButton searchButton = new JButton("Keresés");
@@ -304,7 +285,7 @@ public class ApplicationFrame extends JFrame {
 
         // kölcsönző JComboBox-szal való megadsához
         TableColumn memberColumn = bookTable.getColumnModel().getColumn(6);
-        JComboBox<Member> memberComboBox = memberData.membersComboBox;
+        JComboBox<Member> memberComboBox = this.memberData.getMembersComboBox();
         memberColumn.setCellEditor(new DefaultCellEditor(memberComboBox));
         // TODO: https://stackoverflow.com/questions/13192419/setting-a-tooltip-for-a-value-from-jcomboboxs-items-as-celleditor-in-jtable
     }
@@ -313,7 +294,7 @@ public class ApplicationFrame extends JFrame {
      * Létrehozza és beállítja a szerzők megjelenítéséért felelős komponenseket
      */
     private void initAuthorTable() {
-        JTable authorTable = new JTable(authorData);
+        JTable authorTable = new JTable(this.authorData);
         authorTable.setIntercellSpacing(new Dimension(10, 5)); // cellák ne folyjanak össze
         authorTable.setRowHeight(18);
         authorTable.setAutoCreateRowSorter(true);
@@ -330,7 +311,7 @@ public class ApplicationFrame extends JFrame {
      * Létrehozza és beállítja a könyvtári tagok megjelenítéséért felelős komponenseket
      */
     private void initMemberTable() {
-        JTable memberTable = new JTable(memberData);
+        JTable memberTable = new JTable(this.memberData);
         memberTable.setIntercellSpacing(new Dimension(10, 2)); // cellák ne folyjanak össze
         memberTable.setRowHeight(18);
         memberTable.setAutoCreateRowSorter(true);

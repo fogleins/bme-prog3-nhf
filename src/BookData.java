@@ -4,7 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BookData extends AbstractTableModel {
-    List<Book> books = new ArrayList<>();
+    List<Book> books;
+
+    public BookData() {
+        this.books = new ArrayList<>();
+    }
+
+    public BookData(List<Book> books) {
+        this.books = new ArrayList<>(books);
+    }
 
     @Override
     public int getColumnCount() {
