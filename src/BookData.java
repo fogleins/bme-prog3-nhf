@@ -86,14 +86,23 @@ public class BookData extends AbstractTableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         Book selectedBook = books.get(rowIndex);
-        if (columnIndex == 1)
-            selectedBook.setTitle((String) aValue);
-        else if (columnIndex == 2)
-            selectedBook.setYear((Integer) aValue);
+        if (columnIndex == 1) {
+            String title = (String) aValue;
+            if (!title.equals(""))
+                selectedBook.setTitle(title);
+        }
+        else if (columnIndex == 2) {
+            int year = (Integer) aValue;
+            if (year != 0)
+                selectedBook.setYear(year);
+        }
         else if (columnIndex == 3)
             selectedBook.setCategory((BookCategory.valueOf((String) aValue, "HU")));
-        else if (columnIndex == 4)
-            selectedBook.setLanguage(((String) aValue).toLowerCase());
+        else if (columnIndex == 4) {
+            String lang = (String) aValue;
+            if (!lang.equals(""))
+                selectedBook.setLanguage(lang.toLowerCase());
+        }
         else if (columnIndex == 5) {
             if (selectedBook.getBorrowedBy() != null) {
                 int chosenOption = JOptionPane.showConfirmDialog(null, "A választott könyvet " +

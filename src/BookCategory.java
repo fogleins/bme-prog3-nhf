@@ -8,24 +8,10 @@ public enum BookCategory {
 
     public String getLocalizedName(String locale) {
         if (locale.equals("HU")) {
-//            switch (this) {
-//                case novel:
-//                    return "regény";
-//                case youth:
-//                    return "ifjúsági";
-//                case scientific:
-//                    return "tudományos";
-//                case textbook:
-//                    return "tankönyv";
-//                case dictionary:
-//                    return "szótár";
-//                case other:
-//                    return "egyéb";
-//            }
             String[] categoriesHU = { "regény", "ifjúsági", "tudományos", "tankönyv", "szótár", "egyéb" };
             return categoriesHU[this.ordinal()];
         }
-        return null;
+        return this.name();
     }
 
     public String getLocalizedName() {
