@@ -7,6 +7,8 @@ import java.io.*;
 import java.util.Enumeration;
 import java.util.List;
 
+import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
+
 public class ApplicationFrame extends JFrame {
 
     private Library library;
@@ -15,6 +17,9 @@ public class ApplicationFrame extends JFrame {
     private AuthorData authorData;
     private MemberData memberData;
 
+    private JTable bookTable;
+    private JTable authorTable;
+    private JTable memberTable;
     private JPanel northPanel;
     private JButton addBookButton;
     private JButton removeBookButton;
@@ -111,7 +116,8 @@ public class ApplicationFrame extends JFrame {
         }
     }
 
-    private void removeBook(Book book) {
+    private void removeBook() {
+        Book book = this.bookData.books.get(this.bookTable.convertRowIndexToModel(this.bookTable.getSelectedRow()));
         if (book == null)
             return;
         try {
@@ -123,6 +129,120 @@ public class ApplicationFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "A megadott könyv nincs a tárolt könyvek között. " +
                     "A gyűjtemény nem került módosításra.", "A könyv nem található", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void addNewAuthor() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5)); // a JOptionPane fő panele
+
+        // Labelek létrehozása és panelhez adása
+        JPanel label = new JPanel(new GridLayout(0, 1, 2, 2)); // a JLabeleket tartalmazó panel
+        label.add(new JLabel("Név", SwingConstants.RIGHT));
+        label.add(new JLabel("Születési év", SwingConstants.RIGHT));
+        label.add(new JLabel("Anyanyelv", SwingConstants.RIGHT));
+        panel.add(label, BorderLayout.WEST);
+
+        // a felhasználó által szerkeszthető komponensek létrehozása és panelhez adása
+        JPanel input = new JPanel(new GridLayout(0, 1, 2, 2));
+        JTextField name = new JTextField();
+        JTextField year = new JTextField();
+        JComboBox<String> language = new JComboBox<>();
+        for (NativeLanguage lang : NativeLanguage.values())
+            language.addItem(lang.getLocalizedName());
+
+        input.add(name);
+        input.add(year);
+        input.add(language);
+        panel.add(input, BorderLayout.CENTER);
+
+        int chosenOption = JOptionPane.showConfirmDialog(this, panel, "Új szerző hozzáadása", JOptionPane.OK_CANCEL_OPTION);
+        if (chosenOption == JOptionPane.OK_OPTION) {
+            try {
+                // születési év intté alakítása
+                int birthyear;
+                try {
+                    birthyear = Integer.parseInt(year.getText());
+                } catch (NumberFormatException numberFormatException) {
+                    birthyear = 0;
+                }
+
+                Author newAuthor = new Author(name.getText(), birthyear, NativeLanguage.valueOf((String) language.getSelectedItem(), "HU"));
+                this.authorData.addAuthor(newAuthor);
+            } catch (MissingRequiredArgumentException argumentException) {
+                JOptionPane.showMessageDialog(this, "Hibás adatokat adott meg.", "Hibás adat", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception exception) { // TODO: exception kezelése
+                exception.printStackTrace();
+            }
+        }
+    }
+
+    private void removeAuthor() {
+        if (authorTable.getSelectedRow() < 0) // ha nincs kijelölve sor, nem csinálunk semmit
+            return;
+        Author author = this.authorData.authors.get(this.authorTable.convertRowIndexToModel(this.authorTable.getSelectedRow()));
+        if (author == null)
+            return;
+//        try {
+        int chosenOption = JOptionPane.showConfirmDialog(this, "Biztosan törli a kiválasztott szerzőt?",
+                "Biztosan törli?", JOptionPane.YES_NO_OPTION);
+        if (chosenOption == JOptionPane.YES_OPTION)
+            this.authorData.removeAuthor(author);
+//        } catch (BookNotFoundException notFoundException) {
+//            JOptionPane.showMessageDialog(this, "A megadott könyv nincs a tárolt könyvek között. " +
+//                    "A gyűjtemény nem került módosításra.", "A könyv nem található", JOptionPane.ERROR_MESSAGE);
+//        }
+    }
+
+    private void addNewMember() {
+        JPanel panel = new JPanel(new BorderLayout(5, 5)); // a JOptionPane fő panele
+
+        // Labelek létrehozása és panelhez adása
+        JPanel label = new JPanel(new GridLayout(0, 1, 2, 2)); // a JLabeleket tartalmazó panel
+        label.add(new JLabel("Név", SwingConstants.RIGHT));
+        label.add(new JLabel("Születési év", SwingConstants.RIGHT));
+        label.add(new JLabel("Telefonszám", SwingConstants.RIGHT));
+        panel.add(label, BorderLayout.WEST);
+
+        // a felhasználó által szerkeszthető komponensek létrehozása és panelhez adása
+        JPanel input = new JPanel(new GridLayout(0, 1, 2, 2));
+        JTextField name = new JTextField();
+        JTextField year = new JTextField();
+        JTextField phone = new JTextField();
+        input.add(name);
+        input.add(year);
+        input.add(phone);
+        panel.add(input, BorderLayout.CENTER);
+
+        int chosenOption = JOptionPane.showConfirmDialog(this, panel, "Új könyvtári tag hozzáadása", JOptionPane.OK_CANCEL_OPTION);
+        if (chosenOption == JOptionPane.OK_OPTION) {
+            try {
+                // születési év intté alakítása
+                int birthyear;
+                try {
+                    birthyear = Integer.parseInt(year.getText());
+                } catch (NumberFormatException numberFormatException) {
+                    birthyear = 0;
+                }
+
+                Member newMember = new Member(name.getText(), birthyear, phone.getText());
+                this.memberData.addMember(newMember);
+            } catch (MissingRequiredArgumentException argumentException) {
+                JOptionPane.showMessageDialog(this, "Hibás adatokat adott meg.", "Hibás adat", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception exception) { // TODO: exception kezelése
+                exception.printStackTrace();
+            }
+        }
+    }
+
+    private void removeMember() {
+        if (memberTable.getSelectedRow() < 0) // ha nincs kiválasztott sor, visszatérünk
+            return;
+        Member member = this.memberData.members.get(this.memberTable.convertRowIndexToModel(this.memberTable.getSelectedRow()));
+        if (member == null)
+            return;
+        int chosenOption = JOptionPane.showConfirmDialog(this, "Biztosan törli a kiválasztott tagot?",
+                "Biztosan törli?", JOptionPane.YES_NO_OPTION);
+        if (chosenOption == JOptionPane.YES_OPTION)
+            this.memberData.removeMember(member);
     }
 
     /**
@@ -175,8 +295,11 @@ public class ApplicationFrame extends JFrame {
 
         JMenu file = new JMenu("Fájl");
         JMenuItem open = new JMenuItem("Megnyitás");
+        open.setAccelerator(KeyStroke.getKeyStroke('O', CTRL_DOWN_MASK));
         JMenuItem exit = new JMenuItem("Kilépés");
+        exit.setAccelerator(KeyStroke.getKeyStroke('W', CTRL_DOWN_MASK));
         JMenuItem save = new JMenuItem("Mentés");
+        save.setAccelerator(KeyStroke.getKeyStroke('S', CTRL_DOWN_MASK));
 
         save.addActionListener(new ActionListener() {
             @Override
@@ -195,12 +318,21 @@ public class ApplicationFrame extends JFrame {
         JMenu library = new JMenu("Könyvtár");
         JMenuItem addNew = new JMenuItem("Új könyv hozzáadása");
         JMenuItem remove = new JMenuItem("Könyv eltávolítása");
+        addNew.setAccelerator(KeyStroke.getKeyStroke('N', CTRL_DOWN_MASK));
+        remove.setAccelerator(KeyStroke.getKeyStroke("DELETE"));
 
-        ApplicationFrame parent = this;
         addNew.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 addNewBook();
+            }
+        });
+
+        remove.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (bookTable.getSelectedRow() >= 0)
+                    removeBook();
             }
         });
 
@@ -219,7 +351,7 @@ public class ApplicationFrame extends JFrame {
      * Létrehozza és beállítja a könyvek megjelenítéséért felelős komponenseket
      */
     private void initBookTable() {
-        JTable bookTable = new JTable(bookData);
+        this.bookTable = new JTable(bookData);
         bookTable.setIntercellSpacing(new Dimension(10, 5)); // cellák ne folyjanak össze
         bookTable.setAutoCreateRowSorter(true);
         JScrollPane bookScrollPane = new JScrollPane(bookTable);
@@ -248,7 +380,7 @@ public class ApplicationFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (bookTable.getSelectedRow() >= 0)
-                    removeBook(bookData.books.get(bookTable.convertRowIndexToModel(bookTable.getSelectedRow())));
+                    removeBook();
             }
         });
         booksNorthPanel.add(this.removeBookButton);
@@ -294,16 +426,35 @@ public class ApplicationFrame extends JFrame {
      * Létrehozza és beállítja a szerzők megjelenítéséért felelős komponenseket
      */
     private void initAuthorTable() {
-        JTable authorTable = new JTable(this.authorData);
+        this.authorTable = new JTable(this.authorData);
         authorTable.setIntercellSpacing(new Dimension(10, 5)); // cellák ne folyjanak össze
         authorTable.setRowHeight(18);
         authorTable.setAutoCreateRowSorter(true);
         JScrollPane authorScrollPane = new JScrollPane(authorTable);
         // panel
-        JPanel authorsPanel = new JPanel();
+        JPanel authorsPanel = new JPanel(new BorderLayout());
         authorsPanel.setBorder(BorderFactory.createTitledBorder("Szerzők"));
-        authorsPanel.setLayout(new BorderLayout());
-        authorsPanel.add(authorScrollPane);
+        JPanel authorsComponentPanel = new JPanel();
+        authorsComponentPanel.setLayout(new BoxLayout(authorsComponentPanel, BoxLayout.X_AXIS));
+        JButton addAuthor = new JButton("Szerző hozzáadása...");
+        addAuthor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                    addNewAuthor();
+            }
+        });
+        authorsComponentPanel.add(addAuthor);
+        JButton removeAuthor = new JButton("Szerző eltávolítása");
+        removeAuthor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removeAuthor();
+            }
+        });
+        authorsComponentPanel.add(removeAuthor);
+
+        authorsPanel.add(authorsComponentPanel, BorderLayout.NORTH);
+        authorsPanel.add(authorScrollPane, BorderLayout.CENTER);
         this.northPanel.add(authorsPanel);
     }
 
@@ -311,17 +462,36 @@ public class ApplicationFrame extends JFrame {
      * Létrehozza és beállítja a könyvtári tagok megjelenítéséért felelős komponenseket
      */
     private void initMemberTable() {
-        JTable memberTable = new JTable(this.memberData);
+        this.memberTable = new JTable(this.memberData);
         memberTable.setIntercellSpacing(new Dimension(10, 2)); // cellák ne folyjanak össze
         memberTable.setRowHeight(18);
         memberTable.setAutoCreateRowSorter(true);
         JScrollPane memberScrollPane = new JScrollPane(memberTable);
         this.northPanel.add(memberScrollPane);
         // panel
-        JPanel membersPanel = new JPanel();
+        JPanel membersPanel = new JPanel(new BorderLayout());
         membersPanel.setBorder(BorderFactory.createTitledBorder("Könyvtári tagok"));
-        membersPanel.setLayout(new BorderLayout());
-        membersPanel.add(memberScrollPane);
+        JPanel membersComponentPanel = new JPanel();
+        membersComponentPanel.setLayout(new BoxLayout(membersComponentPanel, BoxLayout.X_AXIS));
+        JButton addMember = new JButton("Tag hozzáadása...");
+        addMember.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addNewMember();
+            }
+        });
+        membersComponentPanel.add(addMember);
+        JButton removeMember = new JButton("Tag eltávolítása");
+        removeMember.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removeMember();
+            }
+        });
+        membersComponentPanel.add(removeMember);
+        membersPanel.add(membersComponentPanel, BorderLayout.NORTH);
+
+        membersPanel.add(memberScrollPane, BorderLayout.CENTER);
         this.northPanel.add(membersPanel, BorderLayout.CENTER);
     }
 

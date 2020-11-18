@@ -65,13 +65,23 @@ public class MemberData extends AbstractTableModel {
         return false;
     }
 
-    public void addMember(String name, int birthyear, String phone) { // TODO: JOptionPane
-        Member member = new Member(name, birthyear, phone);
+    public void addMember(Member member) throws MissingRequiredArgumentException {
+        if (member.getName().equals("") || member.getBirthyear() == 0 || member.getPhone().equals(""))
+            throw new MissingRequiredArgumentException();
         if (!listContains(member)) {
             members.add(member);
             this.membersComboBox.addItem(member);
             fireTableDataChanged();
         }
+    }
+
+    public void addMember(String name, int birthyear, String phone) throws MissingRequiredArgumentException { // TODO: JOptionPane
+        addMember(new Member(name, birthyear, phone));
+    }
+
+    public void removeMember(Member member) {
+        this.members.remove(member);
+        fireTableDataChanged();
     }
 
     private void initComboBox() {

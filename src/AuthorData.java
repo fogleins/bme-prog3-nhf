@@ -66,19 +66,17 @@ public class AuthorData extends AbstractTableModel {
         return false;
     }
 
-    public void addAuthor(Author author) {
+    public void addAuthor(Author author) throws MissingRequiredArgumentException {
+        if (author.getName().equals("") || author.getBirthyear() == 0)
+            throw new MissingRequiredArgumentException();
         if (!listContains(author)) {
             authors.add(author);
             fireTableDataChanged();
         }
     }
 
-    public void addAuthor(String name, int birthyear, NativeLanguage language) {
-        Author author = new Author(name, birthyear, language);
-        if (!listContains(author)) {
-            authors.add(author);
-            fireTableDataChanged();
-        }
+    public void addAuthor(String name, int birthyear, NativeLanguage language) throws MissingRequiredArgumentException {
+        addAuthor(new Author(name, birthyear, language));
     }
 
     public void removeAuthor(Author author) { // TODO: nem létező jelzése?
