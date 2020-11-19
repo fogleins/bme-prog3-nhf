@@ -1,5 +1,4 @@
 import javax.swing.table.AbstractTableModel;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +11,7 @@ public class AuthorData extends AbstractTableModel {
     }
 
     public AuthorData(List<Author> authors) {
-        this.authors = new ArrayList<>(authors);
+        this.authors = authors;
     }
 
     @Override

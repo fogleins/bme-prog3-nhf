@@ -11,7 +11,7 @@ public class BookData extends AbstractTableModel {
     }
 
     public BookData(List<Book> books) {
-        this.books = new ArrayList<>(books);
+        this.books = books;
     }
 
     @Override
