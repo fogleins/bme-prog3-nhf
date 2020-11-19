@@ -56,6 +56,24 @@ public class AuthorData extends AbstractTableModel {
         return String.class;
     }
 
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        if (columnIndex == 0) {
+            String name = (String) aValue;
+            if (!name.equals(""))
+                authors.get(rowIndex).setName(name);
+        }
+        else if (columnIndex == 1)
+            authors.get(rowIndex).setBirthyear((Integer) aValue);
+        else if (columnIndex == 2)
+            authors.get(rowIndex).setNativeLanguage(NativeLanguage.valueOf((String) aValue, "HU"));
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return true;
+    }
+
     private boolean listContains(Author author) {
         for (Author a : authors) {
             if (a.getName().equals(author.getName()) && a.getBirthyear() == author.getBirthyear()

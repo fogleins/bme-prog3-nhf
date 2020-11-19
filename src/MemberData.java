@@ -57,6 +57,28 @@ public class MemberData extends AbstractTableModel {
         return String.class;
     }
 
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        if (columnIndex == 0) {
+            String name = (String) aValue;
+            if (!name.equals(""))
+                members.get(rowIndex).setName(name);
+        }
+        else if (columnIndex == 1) {
+            members.get(rowIndex).setBirthyear((Integer) aValue);
+        }
+        else if (columnIndex == 2) {
+            String phone = (String) aValue;
+            if (!phone.equals(""))
+                members.get(rowIndex).setPhone(phone);
+        }
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return true;
+    }
+
     private boolean listContains(Member member) {
         for (Member m: members) {
             if (m.getName().equals(member.getName()) && m.getBirthyear() == member.getBirthyear() && m.getPhone().equals(member.getPhone()))

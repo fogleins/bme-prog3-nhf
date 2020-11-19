@@ -272,6 +272,13 @@ public class ApplicationFrame extends JFrame {
         for (BookCategory category : BookCategory.values())
             categoryComboBox.addItem(category.getLocalizedName());
         categoryColumn.setCellEditor(new DefaultCellEditor(categoryComboBox));
+
+        // author table
+        TableColumn languageColumn = authorTable.getColumnModel().getColumn(2);
+        JComboBox<String> languageComboBox = new JComboBox<>();
+        for (NativeLanguage language : NativeLanguage.values())
+            languageComboBox.addItem(language.getLocalizedName());
+        languageColumn.setCellEditor(new DefaultCellEditor(languageComboBox));
     }
 
     /**

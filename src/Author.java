@@ -58,9 +58,9 @@ public class Author implements Serializable {
         return language;
     }
 
-//    public void setNativeLanguage(NativeLanguage language) {
-//        this.language = language;
-//    }
+    public void setNativeLanguage(NativeLanguage language) {
+        this.language = language;
+    }
 
 
     @Override
