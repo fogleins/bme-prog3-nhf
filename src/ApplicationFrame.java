@@ -30,10 +30,23 @@ public class ApplicationFrame extends JFrame {
         JFileChooser chooser = new JFileChooser("./");
         FileNameExtensionFilter filter = new FileNameExtensionFilter("libdat adatfájlok", "libdat");
         chooser.setFileFilter(filter);
+        chooser.setDialogTitle("Megnyitás");
         int returnVal = chooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             this.library.serializationPath = chooser.getSelectedFile().getPath();
             readDataFromFile();
+        }
+    }
+
+    private void showSaveAsDialog() {
+        JFileChooser chooser = new JFileChooser("./");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("libdat adatfájlok", "libdat");
+        chooser.setFileFilter(filter);
+        chooser.setDialogType(JFileChooser.SAVE_DIALOG);
+        chooser.setDialogTitle("Mentés másként...");
+        int returnVal = chooser.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            library.saveDataAs(chooser.getSelectedFile().getPath());
         }
     }
 
@@ -71,8 +84,6 @@ public class ApplicationFrame extends JFrame {
                 showOpenFileDialog();
             }
         });
-        JMenuItem exit = new JMenuItem("Kilépés");
-        exit.setAccelerator(KeyStroke.getKeyStroke('W', CTRL_DOWN_MASK)); // TODO: action listener
         JMenuItem save = new JMenuItem("Mentés");
         save.setAccelerator(KeyStroke.getKeyStroke('S', CTRL_DOWN_MASK));
         save.addActionListener(new ActionListener() { // mentésre kattintva elmenti az adatokat
@@ -81,6 +92,15 @@ public class ApplicationFrame extends JFrame {
                 library.saveData();
             }
         });
+        JMenuItem saveAs = new JMenuItem("Mentés másként...");
+        saveAs.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showSaveAsDialog();
+            }
+        });
+        JMenuItem exit = new JMenuItem("Kilépés");
+        exit.setAccelerator(KeyStroke.getKeyStroke('W', CTRL_DOWN_MASK)); // TODO: action listener
 
         JMenu editMenu = new JMenu("Szerkesztés");
 
@@ -105,6 +125,7 @@ public class ApplicationFrame extends JFrame {
 
         fileMenu.add(open);
         fileMenu.add(save);
+        fileMenu.add(saveAs);
         fileMenu.addSeparator();
         fileMenu.add(exit);
 

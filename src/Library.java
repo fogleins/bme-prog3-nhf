@@ -32,15 +32,50 @@ public class Library implements Serializable {
     /**
      * Szerializálja a könyvtár objektumot
      */
-    public void saveData() {
+    public void saveData(String serializationPath) {
         try {
-            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(this.serializationPath));
+            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(serializationPath));
             outputStream.writeObject(this);
             outputStream.close();
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Hiba az adatok mentése során: A könyvek mentése sikertelen ("
                     + ex.getMessage() + ')', "Hiba az adatok mentése során", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Szerializálja a könyvtár objektumot
+     */
+    public void saveData() {
+        saveData(this.serializationPath);
+    }
+
+    /**
+     * Szerializálja a könyvtár objektumot a megadott helyre. Mentés előtt ellenőrzi, hogy létezik-e egyező nevű fájl a célkönyvtárban.
+     * Ha igen, akkor megkérdezi a felhasználót, hogy felülírja-e.
+     * @param serializationPath A mentés helye
+     */
+    public void saveDataAs(String serializationPath) {
+        // ha a felhasznnáló nem adta meg a kiterjesztést, akkor hozzáadjuk a fájlnévhez
+        int extensionIndex = serializationPath.indexOf(".libdat");
+        if (extensionIndex > 0) { // ha megtalálható a kiterjesztés a stringben, ellenőrizzük, hogy az a végén van-e
+            String ext = serializationPath.substring(extensionIndex);
+            if (!ext.equals(".libdat"))
+                extensionIndex = -1; // ha nem a végén van, ugyanazt csináljuk, mintha nem is lenne benne
+        }
+        serializationPath = (extensionIndex == -1) ? serializationPath + ".libdat" : serializationPath;
+        if (!new File(serializationPath).exists()) {
+            this.serializationPath = serializationPath;
+            this.saveData();
+        }
+        else {
+            int chosenOption = JOptionPane.showConfirmDialog(null,
+                    "A megadott helyen már létezik ilyen nevű fájl. Felülírja?", "Névütközés", JOptionPane.YES_NO_OPTION);
+            if (chosenOption == JOptionPane.YES_OPTION) {
+                this.serializationPath = serializationPath;
+                this.saveData();
+            }
         }
     }
 
