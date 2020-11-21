@@ -86,7 +86,12 @@ public class BookData extends AbstractTableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         Book selectedBook = books.get(rowIndex);
-        if (columnIndex == 1) {
+        if (columnIndex == 0) {
+            String author = (String) aValue;
+            if (!author.equals(""))
+                selectedBook.setTitle(author);
+        }
+        else if (columnIndex == 1) {
             String title = (String) aValue;
             if (!title.equals(""))
                 selectedBook.setTitle(title);
@@ -104,21 +109,14 @@ public class BookData extends AbstractTableModel {
                 selectedBook.setLanguage(lang.toLowerCase());
         }
         else if (columnIndex == 5) {
-            if (selectedBook.getBorrowedBy() != null) {
-                int chosenOption = JOptionPane.showConfirmDialog(null, "A választott könyvet " +
-                        "kikölcsönözték. Szeretné nem kölcsönözhetővé állítani? A hozzárendelt kölcsönző eltűnik.",
-                        "A választott könyvet kikölcsönözték", JOptionPane.YES_NO_OPTION);
-                if (chosenOption == JOptionPane.YES_OPTION)
-                    selectedBook.setBorrowedBy(null);
-                else return;
-            }
-            selectedBook.setBorrowable((Boolean) aValue);
+            BorrowManager.borrowableChanged(selectedBook, aValue);
             fireTableDataChanged();
         }
         else if (columnIndex == 6) {
-            if (selectedBook.isBorrowable())
-                selectedBook.setBorrowedBy((Member) aValue);
+            if (selectedBook.isBorrowable()) {
+                BorrowManager.borrowedByChanged(selectedBook, aValue);
+                fireTableDataChanged();
+            }
         }
-        fireTableCellUpdated(rowIndex, columnIndex);
     }
 }

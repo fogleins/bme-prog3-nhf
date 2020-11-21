@@ -1,15 +1,21 @@
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Member implements Serializable {
     private String name;
     private LocalDate dateOfBirth;
     private String phone;
+    private final LocalDate memberSince;
+    private List<Book> borrowedBooks;
 
-    public Member(String name, LocalDate dateOfBirth, String phone) {
+    public Member(String name, LocalDate dateOfBirth, String phone, LocalDate memberSince) {
         this.name = name;
         this.dateOfBirth = dateOfBirth;
         this.phone = phone;
+        this.memberSince = memberSince;
+        this.borrowedBooks = new ArrayList<>();
     }
 
     public String getName() {
@@ -34,6 +40,14 @@ public class Member implements Serializable {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public LocalDate getMemberSince() {
+        return memberSince;
+    }
+
+    public List<Book> getBorrowedBooks() {
+        return borrowedBooks;
     }
 
     @Override

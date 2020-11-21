@@ -21,7 +21,7 @@ public class MemberData extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -37,8 +37,10 @@ public class MemberData extends AbstractTableModel {
                 return member.getName();
             case 1:
                 return member.getDateOfBirth();
-            default:
+            case 2:
                 return member.getPhone();
+            default:
+                return member.getMemberSince();
         }
     }
 
@@ -47,13 +49,14 @@ public class MemberData extends AbstractTableModel {
         switch (column) {
             case 0: return "Név";
             case 1: return "Születési idő";
-            default: return "Telefonszám";
+            case 2: return "Telefonszám";
+            default: return "Tagság kezdete";
         }
     }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        if (columnIndex == 1)
+        if (columnIndex == 1 || columnIndex == 3)
             return LocalDate.class;
         return String.class;
     }
@@ -74,7 +77,7 @@ public class MemberData extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex != 1;
+        return columnIndex != 1 && columnIndex != 3;
     }
 
     private boolean listContains(Member member) {
@@ -95,8 +98,8 @@ public class MemberData extends AbstractTableModel {
         fireTableDataChanged();
     }
 
-    public void addMember(String name, LocalDate dateOfBirth, String phone) throws MissingRequiredArgumentException, PersonAlreadyAddedException { // TODO: JOptionPane
-        addMember(new Member(name, dateOfBirth, phone));
+    public void addMember(String name, LocalDate dateOfBirth, String phone, LocalDate memberSince) throws MissingRequiredArgumentException, PersonAlreadyAddedException { // TODO: JOptionPane
+        addMember(new Member(name, dateOfBirth, phone, memberSince));
     }
 
     public void removeMember(Member member) {

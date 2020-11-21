@@ -164,7 +164,7 @@ public class Library implements Serializable {
                 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 LocalDate dateOfBirth = LocalDate.parse(dateOfBirthField.getText(), dateFormatter);
                 // adatok felvétele
-                Member newMember = new Member(name.getText(), dateOfBirth, phone.getText());
+                Member newMember = new Member(name.getText(), dateOfBirth, phone.getText(), LocalDate.now());
                 this.memberData.addMember(newMember);
             } catch (DateTimeParseException parseException) {
                 JOptionPane.showMessageDialog(null, "Hibás dátumformátumot adott meg. " +
