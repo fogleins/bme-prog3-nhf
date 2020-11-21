@@ -1,10 +1,10 @@
 public enum BookCategory {
-    novel,
-    youth,
-    scientific,
-    textbook,
-    dictionary,
-    other;
+    NOVEL,
+    YOUTH,
+    SCIENTIFIC,
+    TEXTBOOK,
+    DICTIONARY,
+    OTHER;
 
     public String getLocalizedName(String locale) {
         if (locale.equals("HU")) {
@@ -18,23 +18,25 @@ public enum BookCategory {
         return getLocalizedName("HU");
     }
 
-    public static BookCategory valueOf(String localizedString, String fromLocale) {
+    public static BookCategory valueOf(String localizedName, String fromLocale) {
         if (fromLocale.equals("HU")) {
-            switch (localizedString) {
+            switch (localizedName) {
                 case "regény":
-                    return novel;
+                    return NOVEL;
                 case "ifjúsági":
-                    return youth;
+                    return YOUTH;
                 case "tudományos":
-                    return scientific;
+                    return SCIENTIFIC;
                 case "tankönyv":
-                    return textbook;
+                    return TEXTBOOK;
                 case "szótár":
-                    return dictionary;
+                    return DICTIONARY;
                 case "egyéb":
-                    return other;
+                    return OTHER;
+                default:
+                    return null;
             }
         }
-        return other; // TODO
+        return null;
     }
 }

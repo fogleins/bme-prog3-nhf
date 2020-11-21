@@ -1,13 +1,14 @@
 import java.io.Serializable;
+import java.time.LocalDate;
 
 public class Member implements Serializable {
     private String name;
-    private int birthyear;
+    private LocalDate dateOfBirth;
     private String phone;
 
-    public Member(String name, int birthyear, String phone) {
+    public Member(String name, LocalDate dateOfBirth, String phone) {
         this.name = name;
-        this.birthyear = birthyear;
+        this.dateOfBirth = dateOfBirth;
         this.phone = phone;
     }
 
@@ -19,12 +20,12 @@ public class Member implements Serializable {
         this.name = name;
     }
 
-    public int getBirthyear() {
-        return birthyear;
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
     }
 
-    public void setBirthyear(int birthyear) {
-        this.birthyear = birthyear;
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
     }
 
     public String getPhone() {
@@ -37,6 +38,6 @@ public class Member implements Serializable {
 
     @Override
     public String toString() {
-        return name + " (" + birthyear + ", " + phone + ")";
+        return name + " (" + dateOfBirth + ", " + phone + ")";
     }
 }

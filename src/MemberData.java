@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class MemberData extends AbstractTableModel {
             case 0:
                 return member.getName();
             case 1:
-                return member.getBirthyear();
+                return member.getDateOfBirth();
             default:
                 return member.getPhone();
         }
@@ -45,7 +46,7 @@ public class MemberData extends AbstractTableModel {
     public String getColumnName(int column) {
         switch (column) {
             case 0: return "Név";
-            case 1: return "Születési év";
+            case 1: return "Születési idő";
             default: return "Telefonszám";
         }
     }
@@ -53,7 +54,7 @@ public class MemberData extends AbstractTableModel {
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         if (columnIndex == 1)
-            return Integer.class;
+            return LocalDate.class;
         return String.class;
     }
 
@@ -64,9 +65,6 @@ public class MemberData extends AbstractTableModel {
             if (!name.equals(""))
                 members.get(rowIndex).setName(name);
         }
-        else if (columnIndex == 1) {
-            members.get(rowIndex).setBirthyear((Integer) aValue);
-        }
         else if (columnIndex == 2) {
             String phone = (String) aValue;
             if (!phone.equals(""))
@@ -76,29 +74,29 @@ public class MemberData extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return true;
+        return columnIndex != 1;
     }
 
     private boolean listContains(Member member) {
         for (Member m: members) {
-            if (m.getName().equals(member.getName()) && m.getBirthyear() == member.getBirthyear() && m.getPhone().equals(member.getPhone()))
+            if (m.getName().equals(member.getName()) && m.getDateOfBirth().isEqual(member.getDateOfBirth()) && m.getPhone().equals(member.getPhone()))
                 return true;
         }
         return false;
     }
 
-    public void addMember(Member member) throws MissingRequiredArgumentException {
-        if (member.getName().equals("") || member.getBirthyear() == 0 || member.getPhone().equals(""))
+    public void addMember(Member member) throws MissingRequiredArgumentException, PersonAlreadyAddedException {
+        if (member.getName().equals("") || member.getPhone().equals("06301234567"))
             throw new MissingRequiredArgumentException();
-        if (!listContains(member)) {
-            members.add(member);
-            this.membersComboBox.addItem(member);
-            fireTableDataChanged();
-        }
+        if (listContains(member))
+            throw new PersonAlreadyAddedException(member + " már szerepel a programban, így nem lesz hozzáadva.");
+        members.add(member);
+        this.membersComboBox.addItem(member);
+        fireTableDataChanged();
     }
 
-    public void addMember(String name, int birthyear, String phone) throws MissingRequiredArgumentException { // TODO: JOptionPane
-        addMember(new Member(name, birthyear, phone));
+    public void addMember(String name, LocalDate dateOfBirth, String phone) throws MissingRequiredArgumentException, PersonAlreadyAddedException { // TODO: JOptionPane
+        addMember(new Member(name, dateOfBirth, phone));
     }
 
     public void removeMember(Member member) {

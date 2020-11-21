@@ -1,30 +1,34 @@
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 import java.util.List;
 
-/** A tárolt adatokat összefogó osztály */
+/**
+ * A tárolt adatokat összefogó osztály
+ */
 public class Library implements Serializable {
     List<Book> books;
-    List<Author> authors;
     List<Member> members;
 
     transient BookData bookData;
-    transient AuthorData authorData;
     transient MemberData memberData;
     transient String serializationPath;
 
     public Library() {
         this.books = new ArrayList<>();
-        this.authors = new ArrayList<>();
         this.members = new ArrayList<>();
     }
 
     public void initTransientVariables(String serializationPath) {
         this.bookData = new BookData(this.books);
-        this.authorData = new AuthorData(this.authors);
         this.memberData = new MemberData(this.members);
         this.serializationPath = serializationPath;
     }
@@ -54,6 +58,7 @@ public class Library implements Serializable {
     /**
      * Szerializálja a könyvtár objektumot a megadott helyre. Mentés előtt ellenőrzi, hogy létezik-e egyező nevű fájl a célkönyvtárban.
      * Ha igen, akkor megkérdezi a felhasználót, hogy felülírja-e.
+     *
      * @param serializationPath A mentés helye
      */
     public void saveDataAs(String serializationPath) {
@@ -68,8 +73,7 @@ public class Library implements Serializable {
         if (!new File(serializationPath).exists()) {
             this.serializationPath = serializationPath;
             this.saveData();
-        }
-        else {
+        } else {
             int chosenOption = JOptionPane.showConfirmDialog(null,
                     "A megadott helyen már létezik ilyen nevű fájl. Felülírja?", "Névütközés", JOptionPane.YES_NO_OPTION);
             if (chosenOption == JOptionPane.YES_OPTION) {
@@ -81,6 +85,7 @@ public class Library implements Serializable {
 
     /**
      * Beolvas egy könyvtár objektumot adatfájlból
+     *
      * @param library A felülírandó {@code Library} objektum
      * @return A beolvasott {@code Library} objektum, ha a beolvasás nem sikerül, új üres könyvtárat hoz létre
      */
@@ -98,8 +103,7 @@ public class Library implements Serializable {
 
             library = new Library();
             library.initTransientVariables("library.libdat");
-        }
-        catch (Exception ex) { // TODO: exception handling
+        } catch (Exception ex) { // TODO: exception handling
             ex.printStackTrace();
             library = new Library();
             library.initTransientVariables("library.libdat");
@@ -108,76 +112,10 @@ public class Library implements Serializable {
     }
 
     /**
-     * Megjelenít egy párbeszédablakot, amelyben megadhatók egy szerző adatai. Ha hibás adatokat ad meg a felhasználó,
-     * hibaüzenet jelenik meg.
-     */
-    public void addAuthor() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5)); // a JOptionPane fő panele
-
-        // Labelek létrehozása és panelhez adása
-        JPanel label = new JPanel(new GridLayout(0, 1, 2, 2)); // a JLabeleket tartalmazó panel
-        label.add(new JLabel("Név", SwingConstants.RIGHT));
-        label.add(new JLabel("Születési év", SwingConstants.RIGHT));
-        label.add(new JLabel("Anyanyelv", SwingConstants.RIGHT));
-        panel.add(label, BorderLayout.WEST);
-
-        // a felhasználó által szerkeszthető komponensek létrehozása és panelhez adása
-        JPanel input = new JPanel(new GridLayout(0, 1, 2, 2));
-        JTextField name = new JTextField();
-        JTextField year = new JTextField();
-        JComboBox<String> language = new JComboBox<>();
-        for (NativeLanguage lang : NativeLanguage.values())
-            language.addItem(lang.getLocalizedName());
-
-        input.add(name);
-        input.add(year);
-        input.add(language);
-        panel.add(input, BorderLayout.CENTER);
-
-        int chosenOption = JOptionPane.showConfirmDialog(null, panel, "Új szerző hozzáadása", JOptionPane.OK_CANCEL_OPTION);
-        if (chosenOption == JOptionPane.OK_OPTION) {
-            try {
-                // születési év intté alakítása
-                int birthyear;
-                try {
-                    birthyear = Integer.parseInt(year.getText());
-                } catch (NumberFormatException numberFormatException) {
-                    birthyear = 0;
-                }
-
-                Author newAuthor = new Author(name.getText(), birthyear, NativeLanguage.valueOf((String) language.getSelectedItem(), "HU"));
-                this.authorData.addAuthor(newAuthor);
-            } catch (MissingRequiredArgumentException argumentException) {
-                JOptionPane.showMessageDialog(null, "Hibás adatokat adott meg.", "Hibás adat", JOptionPane.ERROR_MESSAGE);
-            } catch (Exception exception) { // TODO: exception kezelése
-                exception.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Eltávolít egy szerzőt a programból.
-     * @param author Az eltávolítandó {@code Author} objektum
-     */ // TODO: ellenőrizze, hogy a megadott szerzőnek vannak-e tárolva könyvei
-    public void removeAuthor(Author author) {
-        if (author == null)
-            return;
-//        try {
-        int chosenOption = JOptionPane.showConfirmDialog(null, "Biztosan törli a kiválasztott szerzőt?",
-                "Biztosan törli?", JOptionPane.YES_NO_OPTION);
-        if (chosenOption == JOptionPane.YES_OPTION)
-            this.authorData.removeAuthor(author);
-//        } catch (BookNotFoundException notFoundException) {
-//            JOptionPane.showMessageDialog(this, "A megadott könyv nincs a tárolt könyvek között. " +
-//                    "A gyűjtemény nem került módosításra.", "A könyv nem található", JOptionPane.ERROR_MESSAGE);
-//        }
-    }
-
-    /**
      * Megjelenít egy párbeszédablakot, amelyben megadhatók egy tag adatai, ha helyesek az adatok, hozzáadja a programhoz.
      * Ha hibás adatokat ad meg a felhasználó, hibaüzenetet jelenít meg.
      */
-    public void addMember() {
+    public void addMember() { // TODO: GUI-s részek elkülönítése
         JPanel panel = new JPanel(new BorderLayout(5, 5)); // a JOptionPane fő panele
 
         // Labelek létrehozása és panelhez adása
@@ -190,28 +128,52 @@ public class Library implements Serializable {
         // a felhasználó által szerkeszthető komponensek létrehozása és panelhez adása
         JPanel input = new JPanel(new GridLayout(0, 1, 2, 2));
         JTextField name = new JTextField();
-        JTextField year = new JTextField();
-        JTextField phone = new JTextField();
+        JFormattedTextField dateOfBirthField = new JFormattedTextField();
+        try {
+            MaskFormatter dateMask = new MaskFormatter("####-##-##");
+            dateMask.install(dateOfBirthField);
+        } catch (ParseException ex) { // TODO
+            System.out.println("nem parse-olható");
+        }
+        JTextField phone = new JTextField("06301234567");
+        phone.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                String phoneFieldValue = phone.getText();
+                if (phoneFieldValue.equals("06301234567"))
+                    phone.setText("");
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                String phoneFieldValue = phone.getText();
+                if (phoneFieldValue.equals("") || !phoneFieldValue.matches("\\d+")) {
+                    phone.setText("06301234567");
+                }
+            }
+        });
         input.add(name);
-        input.add(year);
+        input.add(dateOfBirthField);
         input.add(phone);
         panel.add(input, BorderLayout.CENTER);
 
         int chosenOption = JOptionPane.showConfirmDialog(null, panel, "Új könyvtári tag hozzáadása", JOptionPane.OK_CANCEL_OPTION);
         if (chosenOption == JOptionPane.OK_OPTION) {
             try {
-                // születési év intté alakítása
-                int birthyear;
-                try {
-                    birthyear = Integer.parseInt(year.getText());
-                } catch (NumberFormatException numberFormatException) {
-                    birthyear = 0;
-                }
-
-                Member newMember = new Member(name.getText(), birthyear, phone.getText());
+                // születési idő dátummá alakítása
+                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                LocalDate dateOfBirth = LocalDate.parse(dateOfBirthField.getText(), dateFormatter);
+                // adatok felvétele
+                Member newMember = new Member(name.getText(), dateOfBirth, phone.getText());
                 this.memberData.addMember(newMember);
+            } catch (DateTimeParseException parseException) {
+                JOptionPane.showMessageDialog(null, "Hibás dátumformátumot adott meg. " +
+                        "Használja az éééé-hh-nn formátumot.", "Hibás dátumformátum", JOptionPane.ERROR_MESSAGE);
             } catch (MissingRequiredArgumentException argumentException) {
                 JOptionPane.showMessageDialog(null, "Hibás adatokat adott meg.", "Hibás adat", JOptionPane.ERROR_MESSAGE);
+            } catch (PersonAlreadyAddedException alreadyAddedException) {
+                JOptionPane.showMessageDialog(null, alreadyAddedException.getMessage(),
+                        "A felvenni kívánt tag már szerepel a programban", JOptionPane.WARNING_MESSAGE);
             } catch (Exception exception) { // TODO: exception kezelése
                 exception.printStackTrace();
             }
@@ -220,6 +182,7 @@ public class Library implements Serializable {
 
     /**
      * Eltávolít egy könyvtári tagot a programból.
+     *
      * @param member Az eltávolítandó {@code Member} objektum
      */
     public void removeMember(Member member) {
@@ -250,9 +213,7 @@ public class Library implements Serializable {
 
         // a felhasználó által szerkeszthető komponensek létrehozása és panelhez adása
         JPanel input = new JPanel(new GridLayout(0, 1, 2, 2));
-        JComboBox<Author> author = new JComboBox<>();
-        for (Author a : this.authors)
-            author.addItem(a);
+        JTextField author = new JTextField();
         JTextField title = new JTextField();
         JTextField year = new JTextField();
         JComboBox<String> category = new JComboBox<>();
@@ -299,7 +260,7 @@ public class Library implements Serializable {
                 }
 
                 // könyv létrehozása és gyűjteményhez adása
-                Book newBook = new Book((Author) author.getSelectedItem(), title.getText(), yearOfPublication,
+                Book newBook = new Book(author.getText(), title.getText(), yearOfPublication,
                         BookCategory.valueOf((String) category.getSelectedItem(), "HU"),
                         language.getText().toLowerCase(), chosenRadioButton.equals("Igen"));
                 this.bookData.addBook(newBook);
@@ -313,6 +274,7 @@ public class Library implements Serializable {
 
     /**
      * Eltávolít egy könyvet a programból.
+     *
      * @param book Az eltávolítandó {@code Book} objektum
      */
     public void removeBook(Book book) {

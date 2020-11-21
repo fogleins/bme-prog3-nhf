@@ -2,7 +2,7 @@ import java.io.Serializable;
 
 public class Book implements Serializable {
 
-    private Author author;
+    private String author;
     private String title;
     private int year;
     private BookCategory category;
@@ -10,7 +10,7 @@ public class Book implements Serializable {
     private boolean isBorrowable;
     private Member borrowedBy;
 
-    public Book(Author author, String title, int year, BookCategory category, String language, boolean isBorrowable) {
+    public Book(String author, String title, int year, BookCategory category, String language, boolean isBorrowable) {
         this.author = author;
         this.title = title;
         this.year = year;
@@ -28,11 +28,11 @@ public class Book implements Serializable {
         this.title = title;
     }
 
-    public Author getAuthor() {
+    public String getAuthor() {
         return author;
     }
 
-    public void setAuthor(Author author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 

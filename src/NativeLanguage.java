@@ -1,11 +1,11 @@
 public enum NativeLanguage {
-    Hungarian,
-    English,
-    German,
-    Spanish,
-    Italian,
-    French,
-    other;
+    HUNGARIAN,
+    ENGLISH,
+    GERMAN,
+    SPANISH,
+    ITALIAN,
+    FRENCH,
+    OTHER;
 
     public String getLocalizedName(String locale) {
         if (locale.equals("HU")) {
@@ -23,21 +23,23 @@ public enum NativeLanguage {
         if (fromLocale.equals("HU")) {
             switch (localizedString) {
                 case "magyar":
-                    return Hungarian;
+                    return HUNGARIAN;
                 case "angol":
-                    return English;
+                    return ENGLISH;
                 case "német":
-                    return German;
+                    return GERMAN;
                 case "spanyol":
-                    return Spanish;
+                    return SPANISH;
                 case "olasz":
-                    return Italian;
+                    return ITALIAN;
                 case "francia":
-                    return French;
+                    return FRENCH;
+                case "egyéb":
+                    return OTHER;
                 default:
-                    return other;
+                    return null;
             }
         }
-        return other; // TODO
+        return null;
     }
 }
