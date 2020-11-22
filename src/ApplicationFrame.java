@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.text.MaskFormatter;
 import javax.swing.tree.*;
@@ -20,8 +21,11 @@ public class ApplicationFrame extends JFrame {
     private JTable bookTable;
     private JTable memberTable;
     private JPanel northPanel;
+    private JSplitPane horizontalSplitPane;
+    private JSplitPane verticalSplitPane;
     private SearchBar searchBar;
     private JTree borrowersTree;
+    private Dimension size;
 
 
     private void readDataFromFile() {
@@ -60,8 +64,9 @@ public class ApplicationFrame extends JFrame {
      */
     private void initFrame() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.setMinimumSize(new Dimension(1280, 720));
-        this.setPreferredSize(new Dimension(1280, 720));
+        this.size = new Dimension(1280, 720);
+        this.setMinimumSize(size);
+        this.setPreferredSize(size);
         this.setLocationRelativeTo(null); // az ablak képernyő közepén való megjelenítéséhez
         this.setLayout(new BorderLayout());
 
@@ -70,6 +75,29 @@ public class ApplicationFrame extends JFrame {
             @Override
             public void windowClosing(WindowEvent e) {
                 library.saveData();
+            }
+        });
+
+        // az ablak átméretezésekor megtartjuk a komponensek képernyőn elfoglalt helyének arányát
+        // ha még nem inicializálódott a méret, beállítjuk az alapértelmezett méretet
+        this.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                int horizontalDividerLocation = horizontalSplitPane.getDividerLocation();
+                if (horizontalDividerLocation > 0) {
+                    double proportionalLocation = horizontalDividerLocation / (double) ApplicationFrame.this.size.width;
+                    horizontalSplitPane.setDividerLocation(proportionalLocation);
+                } else { // alapértelmezetten 75%-ra állítjuk
+                    horizontalSplitPane.setDividerLocation(0.75);
+                }
+                int verticalDividerLocation = verticalSplitPane.getDividerLocation();
+                if (verticalDividerLocation > 0) {
+                    double proportionalLocation = verticalDividerLocation / (double) ApplicationFrame.this.size.height;
+                    verticalSplitPane.setDividerLocation(proportionalLocation);
+                } else { // alapértelmezetten 35%
+                    verticalSplitPane.setDividerLocation(0.35);
+                }
+                size.setSize(e.getComponent().getWidth(), e.getComponent().getHeight());
             }
         });
     }
@@ -231,7 +259,7 @@ public class ApplicationFrame extends JFrame {
 
         booksPanel.add(booksNorthPanel, BorderLayout.NORTH);
         booksPanel.add(bookScrollPane, BorderLayout.CENTER);
-        this.add(booksPanel, BorderLayout.CENTER);
+        this.verticalSplitPane.add(booksPanel);
 
         bookTable.setRowHeight(20);
         // TODO: https://stackoverflow.com/questions/13192419/setting-a-tooltip-for-a-value-from-jcomboboxs-items-as-celleditor-in-jtable
@@ -328,11 +356,15 @@ public class ApplicationFrame extends JFrame {
                 reloadTree();
             }
         });
+        this.memberTable.addPropertyChangeListener(propertyChangeEvent -> {
+            reloadTree();
+            refreshBookTable();
+        });
         membersComponentPanel.add(removeMember);
         membersPanel.add(membersComponentPanel, BorderLayout.NORTH);
 
         membersPanel.add(memberScrollPane, BorderLayout.CENTER);
-        this.northPanel.add(membersPanel, BorderLayout.WEST);
+        this.horizontalSplitPane.add(membersPanel);
     }
 
     private void initTree() {
@@ -358,7 +390,7 @@ public class ApplicationFrame extends JFrame {
         JPanel treePanel = new JPanel(new BorderLayout());
         treePanel.setBorder(BorderFactory.createTitledBorder("Aktuális kölcsönzések"));
         treePanel.add(borrowersScrollPane, BorderLayout.CENTER);
-        this.northPanel.add(treePanel, BorderLayout.EAST);
+        this.horizontalSplitPane.add(treePanel);
     }
 
     private void reloadTree() {
@@ -378,6 +410,11 @@ public class ApplicationFrame extends JFrame {
                 borrowersTree.expandRow(i);
             }
         }
+    }
+
+    private void refreshBookTable() {
+        AbstractTableModel ad = (AbstractTableModel) this.bookTable.getModel();
+        ad.fireTableDataChanged();
     }
 
     /**
@@ -425,6 +462,11 @@ public class ApplicationFrame extends JFrame {
         this.library = new Library();
         this.library.serializationPath = "library.libdat";
 
+        this.horizontalSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        this.horizontalSplitPane.setOneTouchExpandable(true);
+        this.verticalSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        this.verticalSplitPane.add(this.horizontalSplitPane);
+        this.verticalSplitPane.setOneTouchExpandable(true); // a két rész külön-külön megjeleníthető
         this.bookTable = new JTable();
         this.memberTable = new JTable();
         readDataFromFile();
@@ -434,7 +476,9 @@ public class ApplicationFrame extends JFrame {
         this.northPanel = new JPanel();
         this.northPanel.setLayout(new BoxLayout(this.northPanel, BoxLayout.X_AXIS));
         this.northPanel.setPreferredSize(new Dimension(1280, 250));
-        this.add(northPanel, BorderLayout.NORTH);
+        this.northPanel.add(this.horizontalSplitPane);
+        this.verticalSplitPane.add(this.northPanel);
+        this.add(this.verticalSplitPane, BorderLayout.CENTER);
         initMemberTable();
         initTree();
         this.pack();

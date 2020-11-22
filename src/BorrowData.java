@@ -21,7 +21,8 @@ public class BorrowData extends DefaultTreeModel {
             return this.members.get(index);
         else if (members.contains(parent)) {
             Member member = ((Member) parent);
-            return member.getBorrowedBooks().get(index).getTitle();
+            Book book = member.getBorrowedBooks().get(index);
+            return book.getAuthor() + ": " + book.getTitle();
         }
         return null;
     }
