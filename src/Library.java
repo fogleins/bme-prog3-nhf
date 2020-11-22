@@ -281,10 +281,14 @@ public class Library implements Serializable {
         if (book == null)
             return;
         try {
-            int chosenOption = JOptionPane.showConfirmDialog(null, "Biztosan törli a kiválasztott könyvet?",
+            int chosenOption = JOptionPane.showConfirmDialog(null,
+                    (book.getBorrowedBy() == null) ? "Biztosan törli a kiválasztott könyvet?" : "A kiválasztott könyvet kikölcsönözték. Biztosan törli?",
                     "Biztosan törli?", JOptionPane.YES_NO_OPTION);
-            if (chosenOption == JOptionPane.YES_OPTION)
+            if (chosenOption == JOptionPane.YES_OPTION) {
+                if (book.getBorrowedBy() != null)
+                    book.getBorrowedBy().getBorrowedBooks().remove(book);
                 this.bookData.removeBook(book);
+            }
         } catch (BookNotFoundException notFoundException) {
             JOptionPane.showMessageDialog(null, "A megadott könyv nincs a tárolt könyvek között. " +
                     "A gyűjtemény nem került módosításra.", "A könyv nem található", JOptionPane.ERROR_MESSAGE);

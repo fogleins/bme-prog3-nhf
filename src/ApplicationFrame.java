@@ -189,6 +189,7 @@ public class ApplicationFrame extends JFrame {
             if (bookTable.getSelectedRow() >= 0) {
                 library.removeBook(library.bookData.books.get(bookTable.convertRowIndexToModel(bookTable.getSelectedRow())));
                 updateBookCount();
+                reloadTree();
             }
         });
         booksNorthPanel.add(removeBookButton);
