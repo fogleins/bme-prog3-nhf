@@ -80,24 +80,32 @@ public class ApplicationFrame extends JFrame {
 
         // az ablak átméretezésekor megtartjuk a komponensek képernyőn elfoglalt helyének arányát
         // ha még nem inicializálódott a méret, beállítjuk az alapértelmezett méretet
-        this.addComponentListener(new ComponentAdapter() {
+        this.addComponentListener(new ComponentAdapter() { // TODO: setDividerLocation(double proportionalLocation) miért nem működik?
             @Override
             public void componentResized(ComponentEvent e) {
+                int eHeight = e.getComponent().getHeight();
+                int eWidth = e.getComponent().getWidth();
                 int horizontalDividerLocation = horizontalSplitPane.getDividerLocation();
                 if (horizontalDividerLocation > 0) {
-                    double proportionalLocation = horizontalDividerLocation / (double) ApplicationFrame.this.size.width;
-                    horizontalSplitPane.setDividerLocation(proportionalLocation);
-                } else { // alapértelmezetten 75%-ra állítjuk
+                    double proportionalLocation = horizontalDividerLocation / (double) size.width;
+                    horizontalSplitPane.setDividerLocation((int) (eWidth * proportionalLocation));
+//                    System.out.println("Horizontal: " + proportionalLocation);
+//                    horizontalSplitPane.setDividerLocation(proportionalLocation);
+                }
+                else { // alapértelmezetten 75%-ra állítjuk
                     horizontalSplitPane.setDividerLocation(0.75);
                 }
                 int verticalDividerLocation = verticalSplitPane.getDividerLocation();
                 if (verticalDividerLocation > 0) {
-                    double proportionalLocation = verticalDividerLocation / (double) ApplicationFrame.this.size.height;
-                    verticalSplitPane.setDividerLocation(proportionalLocation);
-                } else { // alapértelmezetten 35%
+                    double proportionalLocation = verticalDividerLocation / (double) size.height;
+                    verticalSplitPane.setDividerLocation((int) (eHeight * proportionalLocation));
+//                    System.out.println("Vertical: " + proportionalLocation);
+//                    verticalSplitPane.setDividerLocation(proportionalLocation);
+                }
+                else { // alapértelmezetten 35%
                     verticalSplitPane.setDividerLocation(0.35);
                 }
-                size.setSize(e.getComponent().getWidth(), e.getComponent().getHeight());
+                size.setSize(eWidth, eHeight);
             }
         });
     }
@@ -274,7 +282,6 @@ public class ApplicationFrame extends JFrame {
         this.memberTable.setRowHeight(18);
         this.memberTable.setAutoCreateRowSorter(true);
         JScrollPane memberScrollPane = new JScrollPane(this.memberTable);
-        this.northPanel.add(memberScrollPane); // TODO: ennek van jelentősége?
 //        this.memberTable.addMouseListener(new MouseAdapter() {
 //            @Override
 //            public void mousePressed(MouseEvent e) { // TODO: egyszerűsítés, általánosítás
@@ -355,6 +362,7 @@ public class ApplicationFrame extends JFrame {
                 library.removeMember(library.memberData.members.get(
                         memberTable.convertRowIndexToModel(memberTable.getSelectedRow())));
                 reloadTree();
+                refreshBookTable();
             }
         });
         this.memberTable.addPropertyChangeListener(propertyChangeEvent -> {

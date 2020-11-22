@@ -169,8 +169,6 @@ public class Library implements Serializable {
             } catch (DateTimeParseException parseException) {
                 JOptionPane.showMessageDialog(null, "Hibás dátumformátumot adott meg. " +
                         "Használja az éééé-hh-nn formátumot.", "Hibás dátumformátum", JOptionPane.ERROR_MESSAGE);
-            } catch (MissingRequiredArgumentException argumentException) {
-                JOptionPane.showMessageDialog(null, "Hibás adatokat adott meg.", "Hibás adat", JOptionPane.ERROR_MESSAGE);
             } catch (PersonAlreadyAddedException alreadyAddedException) {
                 JOptionPane.showMessageDialog(null, alreadyAddedException.getMessage(),
                         "A felvenni kívánt tag már szerepel a programban", JOptionPane.WARNING_MESSAGE);
@@ -188,10 +186,14 @@ public class Library implements Serializable {
     public void removeMember(Member member) {
         if (member == null)
             return;
-        int chosenOption = JOptionPane.showConfirmDialog(null, "Biztosan törli a kiválasztott tagot?",
-                "Biztosan törli?", JOptionPane.YES_NO_OPTION);
-        if (chosenOption == JOptionPane.YES_OPTION)
+        int chosenOption = JOptionPane.showConfirmDialog(null, "Biztosan törli a kiválasztott " +
+                        "tagot? Ha van kölcsönzött könyve, az törlődik.", "Biztosan törli?", JOptionPane.YES_NO_OPTION);
+        if (chosenOption == JOptionPane.YES_OPTION) {
+            List<Book> books = member.getBorrowedBooks();
+            for (Book book: books)
+                book.setBorrowedBy(null);
             this.memberData.removeMember(member);
+        }
     }
 
     /**
