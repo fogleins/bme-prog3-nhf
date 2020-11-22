@@ -1,9 +1,9 @@
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableColumn;
 import javax.swing.text.MaskFormatter;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.ParseException;
@@ -21,6 +21,7 @@ public class ApplicationFrame extends JFrame {
     private JTable memberTable;
     private JPanel northPanel;
     private SearchBar searchBar;
+    private JTree borrowersTree;
 
 
     private void readDataFromFile() {
@@ -134,6 +135,8 @@ public class ApplicationFrame extends JFrame {
     private void initBookTable() {
         this.bookTable.setIntercellSpacing(new Dimension(10, 5)); // cellák ne folyjanak össze
         this.bookTable.setAutoCreateRowSorter(true);
+        // ha változik a könyvek valamilyen adata, az aktuális kölcsönzések fáját is frissítjük
+        this.bookTable.addPropertyChangeListener(propertyChangeEvent -> reloadTree());
         JScrollPane bookScrollPane = new JScrollPane(this.bookTable);
 
         // Panelek
@@ -242,7 +245,7 @@ public class ApplicationFrame extends JFrame {
         this.memberTable.setRowHeight(18);
         this.memberTable.setAutoCreateRowSorter(true);
         JScrollPane memberScrollPane = new JScrollPane(this.memberTable);
-        this.northPanel.add(memberScrollPane);
+        this.northPanel.add(memberScrollPane); // TODO: ennek van jelentősége?
 //        this.memberTable.addMouseListener(new MouseAdapter() {
 //            @Override
 //            public void mousePressed(MouseEvent e) { // TODO: egyszerűsítés, általánosítás
@@ -312,19 +315,69 @@ public class ApplicationFrame extends JFrame {
         JPanel membersComponentPanel = new JPanel();
         membersComponentPanel.setLayout(new BoxLayout(membersComponentPanel, BoxLayout.X_AXIS));
         JButton addMember = new JButton("Tag hozzáadása...");
-        addMember.addActionListener(actionEvent -> library.addMember());
+        addMember.addActionListener(actionEvent -> {
+            library.addMember();
+            reloadTree();
+        });
         membersComponentPanel.add(addMember);
         JButton removeMember = new JButton("Tag eltávolítása");
         removeMember.addActionListener(actionEvent -> {
-            if (memberTable.getSelectedRow() >= 0)
+            if (memberTable.getSelectedRow() >= 0) {
                 library.removeMember(library.memberData.members.get(
                         memberTable.convertRowIndexToModel(memberTable.getSelectedRow())));
+                reloadTree();
+            }
         });
         membersComponentPanel.add(removeMember);
         membersPanel.add(membersComponentPanel, BorderLayout.NORTH);
 
         membersPanel.add(memberScrollPane, BorderLayout.CENTER);
-        this.northPanel.add(membersPanel, BorderLayout.CENTER);
+        this.northPanel.add(membersPanel, BorderLayout.WEST);
+    }
+
+    private void initTree() {
+        DefaultMutableTreeNode treeRoot = new DefaultMutableTreeNode(this.library.members);
+        BorrowData borrowData = new BorrowData(treeRoot, this.library.members);
+        this.borrowersTree = new JTree(borrowData);
+        this.borrowersTree.setRootVisible(false);
+        this.borrowersTree.setShowsRootHandles(true);
+
+        // Fa elemeinek az ikonjainak beállítása
+        // TODO: ikonok lecserélése?
+//        DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
+//        renderer.setOpenIcon(null);
+//        renderer.setClosedIcon(null);
+//        renderer.setLeafIcon(null);
+//        borrowersTree.setCellRenderer(renderer);
+
+        JScrollPane borrowersScrollPane = new JScrollPane(borrowersTree);
+        this.northPanel.add(borrowersScrollPane);
+//        this.borrowersTree.setBackground(this.northPanel.getBackground());  // TODO: szöveg bg változtatása?
+
+
+        JPanel treePanel = new JPanel(new BorderLayout());
+        treePanel.setBorder(BorderFactory.createTitledBorder("Aktuális kölcsönzések"));
+        treePanel.add(borrowersScrollPane, BorderLayout.CENTER);
+        this.northPanel.add(treePanel, BorderLayout.EAST);
+    }
+
+    private void reloadTree() {
+        if (ApplicationFrame.this.borrowersTree != null) {
+            DefaultTreeModel treeModel = (DefaultTreeModel) ApplicationFrame.this.borrowersTree.getModel();
+            // TODO: ha nem nyitunk ki mindent, a változás után is ugyanazok legyenek kinyitva
+//            int rows = ApplicationFrame.this.borrowersTree.getRowCount();
+//            boolean[] isRowExpanded = new boolean[rows];
+//            for (int i = 0; i < rows; i++)
+//                isRowExpanded[i] = this.borrowersTree.isExpanded(i);
+            treeModel.reload();
+//            for (int i = 0; i < rows; i++) {
+//                if (isRowExpanded[i] && !this.borrowersTree.isExpanded(i))
+//                    borrowersTree.expandRow(i);
+//            }
+            for (int i = 0; i < ApplicationFrame.this.borrowersTree.getRowCount(); i++) {
+                borrowersTree.expandRow(i);
+            }
+        }
     }
 
     /**
@@ -379,11 +432,11 @@ public class ApplicationFrame extends JFrame {
         initMenuBar();
         initBookTable();
         this.northPanel = new JPanel();
-//        this.northPanel.setBorder(BorderFactory.createTitledBorder("Szerzők és Tagok"));
         this.northPanel.setLayout(new BoxLayout(this.northPanel, BoxLayout.X_AXIS));
         this.northPanel.setPreferredSize(new Dimension(1280, 250));
         this.add(northPanel, BorderLayout.NORTH);
         initMemberTable();
+        initTree();
         this.pack();
     }
 

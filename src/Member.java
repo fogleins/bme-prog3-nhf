@@ -52,6 +52,6 @@ public class Member implements Serializable {
 
     @Override
     public String toString() {
-        return name + " (" + dateOfBirth + ", " + phone + ")";
+        return name + " (" + dateOfBirth + ", " + phone + ", " + borrowedBooks.size() + " könyv)";
     }
 }
