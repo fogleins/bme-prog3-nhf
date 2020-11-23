@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.table.TableRowSorter;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
@@ -112,6 +113,35 @@ public class Library implements Serializable {
     }
 
     /**
+     * Megvalósítja a keresés funkciót a tárolt könyvek között
+     *
+     * @param searchFor      A string, amit keresünk
+     * @param searchInAuthor Igaz, ha a szerző nevében is szeretnénk keresni
+     * @return A {@code RowSorter}, amit használva megjelennek a keresés eredményei
+     */
+    public RowSorter<BookData> search(String searchFor, boolean searchInAuthor) {
+        RowFilter<BookData, Integer> bookFilter;
+        if (!searchInAuthor) {
+            bookFilter = new RowFilter<>() {
+                public boolean include(Entry<? extends BookData, ? extends Integer> entry) {
+                    Book book = bookData.books.get(entry.getIdentifier());
+                    return book.getTitle().contains(searchFor);
+                }
+            };
+        } else {
+            bookFilter = new RowFilter<>() {
+                public boolean include(Entry<? extends BookData, ? extends Integer> entry) {
+                    Book book = bookData.books.get(entry.getIdentifier());
+                    return book.getTitle().contains(searchFor) || book.getAuthor().contains(searchFor);
+                }
+            };
+        }
+        TableRowSorter<BookData> sorter = new TableRowSorter<>(bookData);
+        sorter.setRowFilter(bookFilter);
+        return sorter;
+    }
+
+    /**
      * Megjelenít egy párbeszédablakot, amelyben megadhatók egy tag adatai, ha helyesek az adatok, hozzáadja a programhoz.
      * Ha hibás adatokat ad meg a felhasználó, hibaüzenetet jelenít meg.
      */
@@ -187,10 +217,10 @@ public class Library implements Serializable {
         if (member == null)
             return;
         int chosenOption = JOptionPane.showConfirmDialog(null, "Biztosan törli a kiválasztott " +
-                        "tagot? Ha van kölcsönzött könyve, az törlődik.", "Biztosan törli?", JOptionPane.YES_NO_OPTION);
+                "tagot? Ha van kölcsönzött könyve, az törlődik.", "Biztosan törli?", JOptionPane.YES_NO_OPTION);
         if (chosenOption == JOptionPane.YES_OPTION) {
             List<Book> books = member.getBorrowedBooks();
-            for (Book book: books)
+            for (Book book : books)
                 book.setBorrowedBy(null);
             this.memberData.removeMember(member);
         }

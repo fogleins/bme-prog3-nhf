@@ -23,7 +23,7 @@ public class ApplicationFrame extends JFrame {
     private JPanel northPanel;
     private JSplitPane horizontalSplitPane;
     private JSplitPane verticalSplitPane;
-    private SearchBar searchBar;
+    private JTextField searchBar;
     private JTree borrowersTree;
     private Dimension size;
 
@@ -206,59 +206,55 @@ public class ApplicationFrame extends JFrame {
         booksNorthPanel.add(showBorrowedBooksOnly);  // TODO: action listener a toggle-re
 
         // keresés komponensei
-        this.searchBar = new SearchBar(this.library, "Keresés " + library.bookData.books.size() + " könyv között");
-        this.searchBar.addFocusListener(new FocusAdapter() { // a mezőbe kattintáskor eltűnik a szöveg
+//        this.searchBar = new SearchBar(this.library, "Keresés " + library.bookData.books.size() + " könyv között");
+        JCheckBox searchAuthorToo = new JCheckBox("Keresés a szerzők nevében is");
+        searchAuthorToo.addActionListener(e -> {
+            String searchBarText = searchBar.getText();
+            if (!searchBarText.equals("Keresés " + library.books.size() + " könyv között"))
+                bookTable.setRowSorter(library.search(searchBarText, searchAuthorToo.isSelected()));
+        });
+        this.searchBar = new JTextField();
+        updateBookCount();
+        searchBar.addFocusListener(new FocusAdapter() { // a mezőbe kattintáskor eltűnik a szöveg
             @Override
             public void focusGained(FocusEvent e) {
-                searchBar.setText("");
+                if (searchBar.getText().equals("Keresés " + library.books.size() + " könyv között"))
+                    searchBar.setText("");
             }
         });
-        this.searchBar.addFocusListener(new FocusAdapter() { // ha inaktív lesz a mező, a szöveg újból megjelenik
+        searchBar.addFocusListener(new FocusAdapter() { // ha inaktív lesz a mező, a szöveg újból megjelenik
             @Override
             public void focusLost(FocusEvent e) {
-                updateBookCount();
+                String searchBarText = searchBar.getText();
+                if (searchBarText.equals("Keresés " + library.books.size() + " könyv között") || searchBarText.equals(""))
+                    updateBookCount();
             }
         });
-//        this.searchBar.addKeyListener(new KeyAdapter() { // karakter leütésekor frissül a keresés
-//            @Override
-//            public void keyTyped(KeyEvent e) { // TODO
-//                System.out.println("key:\t" + Character.isLetter(e.getKeyChar()));
-//                System.out.println("text:\t" + searchBar.getText());
-//                String textboxContent = searchBar.getText();
-//                if (Character.isLetter(e.getKeyChar()))
-//                    library.search(bookTable, textboxContent + e.getKeyChar(), false);
-//                else if (textboxContent.equals("")) {
-//                    library.search(bookTable, "", false);
-//                }
-//            }
-//        });
-//        this.searchBar.getDocument().addDocumentListener(new DocumentListener() {
-//            @Override
-//            public void insertUpdate(DocumentEvent e) {
-//                String searchBarText = searchBar.getText();
-//                if (searchBarText.equals(searchBar.getText())) {
-//                    System.out.println(searchBarText);
-//                    library.search(/*bookTable, */searchBarText, false);
-//                }
-//            }
-//
-//            @Override
-//            public void removeUpdate(DocumentEvent e) {
-//                String searchBarText = searchBar.getText();
-//                if (searchBarText.equals(searchBar.getText())) {
-//                    System.out.println(searchBar.getText());
-//                    library.search(/*bookTable, */searchBar.getText(), false);
-//                }
-//            }
-//
-//            @Override
-//            public void changedUpdate(DocumentEvent e) {
-//                System.out.println(searchBar.getText());
-//                library.search(bookTable, searchBar.getText(), false);
-//            }
-//        });
-//        booksNorthPanel.add(this.searchBar);
-        JCheckBox searchAuthorToo = new JCheckBox("Keresés a szerzők nevében is");
+
+        searchBar.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                String searchBarText = searchBar.getText();
+                if (!searchBarText.equals("Keresés " + library.books.size() + " könyv között")) {
+                    bookTable.setRowSorter(library.search(searchBarText, searchAuthorToo.isSelected()));
+                    System.out.println("insertUpdate");
+                }
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                String searchBarText = searchBar.getText();
+                    bookTable.setRowSorter(library.search(searchBarText, searchAuthorToo.isSelected()));
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                String searchBarText = searchBar.getText();
+                bookTable.setRowSorter(library.search(searchBarText, searchAuthorToo.isSelected()));
+            }
+        });
+        booksNorthPanel.add(searchBar);
+
         JButton searchButton = new JButton("Keresés");
         searchButton.addActionListener(actionEvent -> {
             // TODO: keresés gomb eltávolítása?

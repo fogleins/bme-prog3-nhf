@@ -79,7 +79,7 @@ public class BookData extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex != 0;
+        return true;
     }
 
     @Override
@@ -88,7 +88,7 @@ public class BookData extends AbstractTableModel {
         if (columnIndex == 0) {
             String author = (String) aValue;
             if (!author.equals(""))
-                selectedBook.setTitle(author);
+                selectedBook.setAuthor(author);
         }
         else if (columnIndex == 1) {
             String title = (String) aValue;
