@@ -141,6 +141,19 @@ public class Library implements Serializable {
         return sorter;
     }
 
+    public RowSorter<BookData> showBorrowedOnly() {
+        RowFilter<BookData, Integer> bookFilter = new RowFilter<>() {
+            @Override
+            public boolean include(Entry<? extends BookData, ? extends Integer> entry) {
+                Book book = bookData.books.get(entry.getIdentifier());
+                return book.getBorrowedBy() != null;
+            }
+        };
+        TableRowSorter<BookData> sorter = new TableRowSorter<>(bookData);
+        sorter.setRowFilter(bookFilter);
+        return sorter;
+    }
+
     /**
      * Megjelenít egy párbeszédablakot, amelyben megadhatók egy tag adatai, ha helyesek az adatok, hozzáadja a programhoz.
      * Ha hibás adatokat ad meg a felhasználó, hibaüzenetet jelenít meg.
@@ -151,7 +164,7 @@ public class Library implements Serializable {
         // Labelek létrehozása és panelhez adása
         JPanel label = new JPanel(new GridLayout(0, 1, 2, 2)); // a JLabeleket tartalmazó panel
         label.add(new JLabel("Név", SwingConstants.RIGHT));
-        label.add(new JLabel("Születési év", SwingConstants.RIGHT));
+        label.add(new JLabel("Születési idő", SwingConstants.RIGHT));
         label.add(new JLabel("Telefonszám", SwingConstants.RIGHT));
         panel.add(label, BorderLayout.WEST);
 
@@ -199,6 +212,9 @@ public class Library implements Serializable {
             } catch (DateTimeParseException parseException) {
                 JOptionPane.showMessageDialog(null, "Hibás dátumformátumot adott meg. " +
                         "Használja az éééé-hh-nn formátumot.", "Hibás dátumformátum", JOptionPane.ERROR_MESSAGE);
+            } catch (MissingRequiredArgumentException missingRequiredArgumentException) {
+                JOptionPane.showMessageDialog(null, missingRequiredArgumentException.getMessage(),
+                        "Hibás adatokat adott meg.", JOptionPane.WARNING_MESSAGE);
             } catch (PersonAlreadyAddedException alreadyAddedException) {
                 JOptionPane.showMessageDialog(null, alreadyAddedException.getMessage(),
                         "A felvenni kívánt tag már szerepel a programban", JOptionPane.WARNING_MESSAGE);

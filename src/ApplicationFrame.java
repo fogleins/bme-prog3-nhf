@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.text.MaskFormatter;
 import javax.swing.tree.*;
@@ -26,6 +27,36 @@ public class ApplicationFrame extends JFrame {
     private JTextField searchBar;
     private JTree borrowersTree;
     private Dimension size;
+
+    /**
+     * Renderer a könyveket tartalmazó táblázathoz; a tárolt könyvek elérhetősége alapján más-más betűtípussal jeleníti meg a sorokat.
+     */
+    private class BookTableCellRenderer implements TableCellRenderer { // TODO: maradjon?
+
+        private final TableCellRenderer renderer;
+
+        public BookTableCellRenderer(TableCellRenderer renderer) {
+            this.renderer = renderer;
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component c = renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            boolean borrowable = (boolean) (library.bookData.getValueAt(row, 5));
+            if (borrowable)
+                if ((library.bookData.getValueAt(row, 6)) != null)
+                    c.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+
+                else
+                    c.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 12));
+            else {
+                c.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+//                c.setBackground(new Color(0xEEEEEE));
+            }
+            return c;
+        }
+
+    }
 
 
     private void readDataFromFile() {
@@ -80,7 +111,7 @@ public class ApplicationFrame extends JFrame {
 
         // az ablak átméretezésekor megtartjuk a komponensek képernyőn elfoglalt helyének arányát
         // ha még nem inicializálódott a méret, beállítjuk az alapértelmezett méretet
-        this.addComponentListener(new ComponentAdapter() { // TODO: setDividerLocation(double proportionalLocation) miért nem működik?
+        this.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
                 int eHeight = e.getComponent().getHeight();
@@ -89,20 +120,14 @@ public class ApplicationFrame extends JFrame {
                 if (horizontalDividerLocation > 0) {
                     double proportionalLocation = horizontalDividerLocation / (double) size.width;
                     horizontalSplitPane.setDividerLocation((int) (eWidth * proportionalLocation));
-//                    System.out.println("Horizontal: " + proportionalLocation);
-//                    horizontalSplitPane.setDividerLocation(proportionalLocation);
-                }
-                else { // alapértelmezetten 75%-ra állítjuk
+                } else { // alapértelmezetten 75%-ra állítjuk
                     horizontalSplitPane.setDividerLocation(0.75);
                 }
                 int verticalDividerLocation = verticalSplitPane.getDividerLocation();
                 if (verticalDividerLocation > 0) {
                     double proportionalLocation = verticalDividerLocation / (double) size.height;
                     verticalSplitPane.setDividerLocation((int) (eHeight * proportionalLocation));
-//                    System.out.println("Vertical: " + proportionalLocation);
-//                    verticalSplitPane.setDividerLocation(proportionalLocation);
-                }
-                else { // alapértelmezetten 35%
+                } else { // alapértelmezetten 35%
                     verticalSplitPane.setDividerLocation(0.35);
                 }
                 size.setSize(eWidth, eHeight);
@@ -203,10 +228,14 @@ public class ApplicationFrame extends JFrame {
         booksNorthPanel.add(removeBookButton);
         booksNorthPanel.add(Box.createHorizontalGlue());
         JCheckBox showBorrowedBooksOnly = new JCheckBox("Csak a kölcsönzött könyvek mutatása");
-        booksNorthPanel.add(showBorrowedBooksOnly);  // TODO: action listener a toggle-re
+        showBorrowedBooksOnly.addActionListener(actionEvent -> {
+            if (showBorrowedBooksOnly.isSelected())
+                bookTable.setRowSorter(library.showBorrowedOnly());
+            else bookTable.setAutoCreateRowSorter(true);
+        });
+        booksNorthPanel.add(showBorrowedBooksOnly);
 
         // keresés komponensei
-//        this.searchBar = new SearchBar(this.library, "Keresés " + library.bookData.books.size() + " könyv között");
         JCheckBox searchAuthorToo = new JCheckBox("Keresés a szerzők nevében is");
         searchAuthorToo.addActionListener(e -> {
             String searchBarText = searchBar.getText();
@@ -244,7 +273,7 @@ public class ApplicationFrame extends JFrame {
             @Override
             public void removeUpdate(DocumentEvent e) {
                 String searchBarText = searchBar.getText();
-                    bookTable.setRowSorter(library.search(searchBarText, searchAuthorToo.isSelected()));
+                bookTable.setRowSorter(library.search(searchBarText, searchAuthorToo.isSelected()));
             }
 
             @Override
@@ -254,17 +283,17 @@ public class ApplicationFrame extends JFrame {
             }
         });
         booksNorthPanel.add(searchBar);
-
-        JButton searchButton = new JButton("Keresés");
-        searchButton.addActionListener(actionEvent -> {
-            // TODO: keresés gomb eltávolítása?
-        });
         booksNorthPanel.add(searchAuthorToo);
-        booksNorthPanel.add(searchButton);
 
         booksPanel.add(booksNorthPanel, BorderLayout.NORTH);
         booksPanel.add(bookScrollPane, BorderLayout.CENTER);
         this.verticalSplitPane.add(booksPanel);
+
+        // CellRendererek beállítása TODO: maradjon?
+        bookTable.setDefaultRenderer(String.class, new BookTableCellRenderer(bookTable.getDefaultRenderer(String.class)));
+        bookTable.setDefaultRenderer(Integer.class, new BookTableCellRenderer(bookTable.getDefaultRenderer(Integer.class)));
+        bookTable.setDefaultRenderer(Boolean.class, new BookTableCellRenderer(bookTable.getDefaultRenderer(Boolean.class)));
+        bookTable.setDefaultRenderer(Member.class, new BookTableCellRenderer(bookTable.getDefaultRenderer(Member.class)));
 
         bookTable.setRowHeight(20);
         // TODO: https://stackoverflow.com/questions/13192419/setting-a-tooltip-for-a-value-from-jcomboboxs-items-as-celleditor-in-jtable
