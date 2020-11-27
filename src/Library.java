@@ -6,21 +6,48 @@ import java.util.*;
 import java.util.List;
 
 /**
- * A tárolt adatokat összefogó osztály
+ * A tárolt adatokat összefogó osztály.
  */
 public class Library implements Serializable {
+    /**
+     * A tárolt könyvek listája.
+     */
     List<Book> books;
+
+    /**
+     * A tárolt tagok listája.
+     */
     List<Member> members;
 
+
+    /**
+     * A könyvek adatait tároló táblázat modellje.
+     */
     transient BookData bookData;
+
+    /**
+     * A tagok adatait tartalmazó táblázat modellje.
+     */
     transient MemberData memberData;
+
+    /**
+     * A szerializált adatok mentési helye.
+     */
     transient String serializationPath;
 
+    /**
+     * Konstruktor
+     */
     public Library() {
         this.books = new ArrayList<>();
         this.members = new ArrayList<>();
     }
 
+    /**
+     * Inicializálja a nem szerializált adattagokat.
+     *
+     * @param serializationPath A szerializálás elérési útvonala
+     */
     public void initTransientVariables(String serializationPath) {
         this.bookData = new BookData(this.books);
         this.memberData = new MemberData(this.members);
@@ -28,7 +55,9 @@ public class Library implements Serializable {
     }
 
     /**
-     * Szerializálja a könyvtár objektumot
+     * Szerializálja a könyvtár objektumot.
+     *
+     * @param serializationPath A szerializálás elérési útvonala
      */
     public void saveData(String serializationPath) {
         try {
@@ -78,12 +107,12 @@ public class Library implements Serializable {
     }
 
     /**
-     * Beolvas egy könyvtár objektumot adatfájlból
+     * Beolvas egy könyvtár objektumot adatfájlból.
      *
      * @param library A felülírandó {@code Library} objektum
      * @return A beolvasott {@code Library} objektum, ha a beolvasás nem sikerül, új üres könyvtárat hoz létre
      */
-    public static Library readDataFromFile(/*String serializationPath*/Library library) {
+    public static Library readDataFromFile(Library library) {
         try {
             String path = library.serializationPath;
             ObjectInputStream libraryInputStream = new ObjectInputStream(new FileInputStream(path));
@@ -106,7 +135,7 @@ public class Library implements Serializable {
     }
 
     /**
-     * Megvalósítja a keresés funkciót a tárolt könyvek között
+     * Megvalósítja a keresés funkciót a tárolt könyvek között.
      *
      * @param searchFor      A string, amit keresünk
      * @param searchInAuthor Igaz, ha a szerző nevében is szeretnénk keresni
@@ -134,22 +163,18 @@ public class Library implements Serializable {
         return sorter;
     }
 
+    /**
+     * A könyvek táblázatában csak a kölcsönzött könyveket mutatja.
+     *
+     * @return A {@code RowSorter}, amit használva csak a kölcsönzött könyvek lesznek láthatóak
+     */
     public RowSorter<BookData> showBorrowedOnly() {
-        RowFilter<BookData, Integer> bookFilter = new RowFilter<>() {
-            @Override
-            public boolean include(Entry<? extends BookData, ? extends Integer> entry) {
-                Book book = bookData.books.get(entry.getIdentifier());
-                return book.getBorrowedBy() != null;
-            }
-        };
-        TableRowSorter<BookData> sorter = new TableRowSorter<>(bookData);
-        sorter.setRowFilter(bookFilter);
-        return sorter;
+        return bookData.showBorrowedOnly();
     }
 
     /**
      * Megjelenít egy párbeszédablakot, amelyben megadhatók egy könyv adatai. Ha az adatok helyesek, hozzáadja a programhoz.
-     * Ha hobás adatokat adott meg a felhasználó, hibaüzenet jelenik meg.
+     * Ha hibás adatokat adott meg a felhasználó, hibaüzenet jelenik meg.
      */
     public void addBook() {
         JPanel panel = new JPanel(new BorderLayout(5, 5)); // a JOptionPane fő panele
@@ -233,18 +258,13 @@ public class Library implements Serializable {
     public void removeBook(Book book) {
         if (book == null)
             return;
-        try {
-            int chosenOption = JOptionPane.showConfirmDialog(null,
-                    (book.getBorrowedBy() == null) ? "Biztosan törli a kiválasztott könyvet?" : "A kiválasztott könyvet kikölcsönözték. Biztosan törli?",
-                    "Biztosan törli?", JOptionPane.YES_NO_OPTION);
-            if (chosenOption == JOptionPane.YES_OPTION) {
-                if (book.getBorrowedBy() != null)
-                    book.getBorrowedBy().getBorrowedBooks().remove(book);
-                this.bookData.removeBook(book);
-            }
-        } catch (BookNotFoundException notFoundException) {
-            JOptionPane.showMessageDialog(null, "A megadott könyv nincs a tárolt könyvek között. " +
-                    "A gyűjtemény nem került módosításra.", "A könyv nem található", JOptionPane.ERROR_MESSAGE);
+        int chosenOption = JOptionPane.showConfirmDialog(null,
+                (book.getBorrowedBy() == null) ? "Biztosan törli a kiválasztott könyvet?" : "A kiválasztott könyvet kikölcsönözték. Biztosan törli?",
+                "Biztosan törli?", JOptionPane.YES_NO_OPTION);
+        if (chosenOption == JOptionPane.YES_OPTION) {
+            if (book.getBorrowedBy() != null)
+                book.getBorrowedBy().getBorrowedBooks().remove(book);
+            this.bookData.removeBook(book);
         }
     }
 }

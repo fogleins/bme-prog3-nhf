@@ -4,15 +4,33 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A tagokat megjelenítő táblázat modellje.
+ */
 public class MemberData extends AbstractTableModel {
+    /**
+     * A tagok listája.
+     */
     List<Member> members;
+
+    /**
+     * A tagokat tartalmazó {@code JComboBox} objektum.
+     */
     JComboBox<Member> membersComboBox;
 
+    /**
+     * Konstruktor
+     */
     public MemberData() {
         this.members = new ArrayList<>();
         this.membersComboBox = new JComboBox<>(); // TODO: initComboBox() biztosan nem kell?
     }
 
+    /**
+     * Konstruktor
+     *
+     * @param members A tagok listája, akiket meg szeretnénk jeleníteni a táblázatban
+     */
     public MemberData(List<Member> members) {
         this.members = members;
         this.membersComboBox = new JComboBox<>();
@@ -47,10 +65,14 @@ public class MemberData extends AbstractTableModel {
     @Override
     public String getColumnName(int column) {
         switch (column) {
-            case 0: return "Név";
-            case 1: return "Születési idő";
-            case 2: return "Telefonszám";
-            default: return "Tagság kezdete";
+            case 0:
+                return "Név";
+            case 1:
+                return "Születési idő";
+            case 2:
+                return "Telefonszám";
+            default:
+                return "Tagság kezdete";
         }
     }
 
@@ -104,12 +126,18 @@ public class MemberData extends AbstractTableModel {
 //        fireTableDataChanged();
 //    }
 
+    /**
+     * Feltölti a ComboBox-ot a tagok adataival.
+     */
     private void initComboBox() {
         this.membersComboBox = new JComboBox<>();
         for (Member member : this.members)
             this.membersComboBox.addItem(member);
     }
 
+    /**
+     * @return A tagok adatait tartalmazó ComboBox
+     */
     public JComboBox<Member> getMembersComboBox() {
         return membersComboBox;
     }

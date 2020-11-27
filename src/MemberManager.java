@@ -9,9 +9,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
+/**
+ * A tagok felvételét és szerkesztését kezelő osztály.
+ */
 class MemberManager {
     /**
-     * Létrehoz egy tagok adatai megadását lehetővé tevő panelt a szükséges komponensekkel és lehetővé teszi a komponensek későbbi elérését és szerkesztését
+     * Létrehoz egy tagok adatai megadását lehetővé tevő panelt a szükséges komponensekkel és lehetővé teszi a komponensek későbbi elérését és szerkesztését.
      */
     private static class MemberPanel extends JPanel {
         JPanel mainPanel;
@@ -20,7 +23,7 @@ class MemberManager {
         JTextField phone;
 
         /**
-         * Létrehoz egy tagok adatainak megadását lehetővé tevő panelt és inicializálja a komponenseit
+         * Létrehoz egy tagok adatainak megadását lehetővé tevő panelt és inicializálja a komponenseit.
          */
         MemberPanel() {
             this.mainPanel = new JPanel(new BorderLayout(5, 5)); // a JOptionPane fő panele
@@ -65,7 +68,7 @@ class MemberManager {
     }
 
     /**
-     * Megvizsgálja, hogy a megadott adatok érvényesek-e, lehetnek-e egy {@code Member} adatai
+     * Megvizsgálja, hogy a megadott adatok érvényesek-e, lehetnek-e egy {@code Member} adatai.
      *
      * @param memberName        A felhasználó által megadott név
      * @param memberDateOfBirth A felhasználó által megadott születési idő
@@ -85,7 +88,7 @@ class MemberManager {
     }
 
     /**
-     * Lehetővé teszi egy tag adatainak szerkesztését
+     * Lehetővé teszi egy tag adatainak szerkesztését.
      *
      * @param member A szerkesztendő tag
      */
@@ -111,7 +114,7 @@ class MemberManager {
     }
 
     /**
-     * Lehetővé teszi egy új tag létrehozását grafikus felületen keresztül. Ha helyesek a megadott adatok, hozzáadja a tagot a programhoz
+     * Lehetővé teszi egy új tag létrehozását grafikus felületen keresztül. Ha helyesek a megadott adatok, hozzáadja a tagot a programhoz.
      *
      * @param library A könyvtár objektum, aminek a tagjai közé felvesszük az új tagot
      */

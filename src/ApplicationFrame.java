@@ -9,17 +9,57 @@ import java.awt.event.*;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 
+/**
+ * A program ablaka.
+ */
 public class ApplicationFrame extends JFrame {
 
+    /**
+     * A könytár objektum, aminek az adatait megjeleníti a program.
+     */
     private Library library;
 
+    /**
+     * A könyveket tartalmazó {@code JTable} objektum.
+     */
     private JTable bookTable;
+
+    /**
+     * A könyvtári tagokat tartalmazó {@code JTable} objektum.
+     */
     private JTable memberTable;
+
+    /**
+     * Az ablak északi panele, amin megjelenik a tagokat tartalmazó táblázat és az aktuális kölcsönzéseket nyilvántartó fa struktúra.
+     */
     private JPanel northPanel;
+
+    /**
+     * A képernyőt vízszintesen két részre osztó {@code JSplitPane} objektum, mely tartalmazza az északi panelt és a könyvek táblázatát.
+     */
     private JSplitPane horizontalSplitPane;
+
+    /**
+     * Az északi panel komponenseit függőlegesen kettéválasztó {@code JSplitPane} objektum.
+     */
     private JSplitPane verticalSplitPane;
+
+    /**
+     * A könyvek közti kereséshez használt szövegmező.
+     */
     private JTextField searchBar;
+
+    /**
+     * A kölcsönzések nyilvántartására használt {@code JTree} objektum.
+     */
     private JTree borrowersTree;
+
+    /**
+     * Az ablak aktuális méretét nyilvántartó objektum. Az ablak átméretezésekor a komponensek képernyőn elfoglalt helyének
+     * arányának megtartására használjuk.
+     *
+     * @see #initFrame()
+     */
     private Dimension windowSize;
 
     /**
@@ -27,8 +67,16 @@ public class ApplicationFrame extends JFrame {
      */
     private class BookTableCellRenderer implements TableCellRenderer { // TODO: maradjon?
 
+        /**
+         * A táblázat renderere.
+         */
         private final TableCellRenderer renderer;
 
+        /**
+         * // TODO
+         *
+         * @param renderer
+         */
         public BookTableCellRenderer(TableCellRenderer renderer) {
             this.renderer = renderer;
         }
@@ -49,7 +97,9 @@ public class ApplicationFrame extends JFrame {
 
     }
 
-
+    /**
+     * Visszaolvassa az adatokat egy korábban sorosított fájlból.
+     */
     private void readDataFromFile() {
         this.library = Library.readDataFromFile(this.library);
         this.bookTable.setModel(this.library.bookData);
@@ -57,6 +107,9 @@ public class ApplicationFrame extends JFrame {
         initCellEditors();
     }
 
+    /**
+     * Megjelenít egy tallózás ablakot, ahol ha a felhasználó megfelelő kiterjesztésű fájlt választ ki, akkor beolvassa belőle az adatokat.
+     */
     private void showOpenFileDialog() {
         JFileChooser chooser = new JFileChooser("./");
         FileNameExtensionFilter filter = new FileNameExtensionFilter("libdat adatfájlok", "libdat");
@@ -69,6 +122,10 @@ public class ApplicationFrame extends JFrame {
         }
     }
 
+    /**
+     * Megjelenít egy "Mentés másként..." ablakot, amiben a felhasználó megadhatja, hogy hova szeretné menteni a fájlt.
+     * Ezt követően a megadott helyre írja a fájlt.
+     */
     private void showSaveAsDialog() {
         JFileChooser chooser = new JFileChooser("./");
         FileNameExtensionFilter filter = new FileNameExtensionFilter("libdat adatfájlok", "libdat");
@@ -339,6 +396,9 @@ public class ApplicationFrame extends JFrame {
         this.horizontalSplitPane.add(membersPanel);
     }
 
+    /**
+     * Inicializálja a kölcsönzéseket nyilvántartó {@code JTree} objektumot.
+     */
     private void initTree() {
         DefaultMutableTreeNode treeRoot = new DefaultMutableTreeNode(this.library.members);
         BorrowData borrowData = new BorrowData(treeRoot, this.library.members);
@@ -365,29 +425,29 @@ public class ApplicationFrame extends JFrame {
         this.horizontalSplitPane.add(treePanel);
     }
 
+    /**
+     * Frissíti a kölcsönzéseket nyilvántartó fa struktúrát.
+     */
     private void reloadTree() {
         if (ApplicationFrame.this.borrowersTree != null) {
             DefaultTreeModel treeModel = (DefaultTreeModel) ApplicationFrame.this.borrowersTree.getModel();
-            // TODO: ha nem nyitunk ki mindent, a változás után is ugyanazok legyenek kinyitva
-//            int rows = ApplicationFrame.this.borrowersTree.getRowCount();
-//            boolean[] isRowExpanded = new boolean[rows];
-//            for (int i = 0; i < rows; i++)
-//                isRowExpanded[i] = this.borrowersTree.isExpanded(i);
             treeModel.reload();
-//            for (int i = 0; i < rows; i++) {
-//                if (isRowExpanded[i] && !this.borrowersTree.isExpanded(i))
-//                    borrowersTree.expandRow(i);
-//            }
             for (int i = 0; i < ApplicationFrame.this.borrowersTree.getRowCount(); i++) {
                 borrowersTree.expandRow(i);
             }
         }
     }
 
+    /**
+     * Frissíti a könyvek adatait tartalmazó táblázatot.
+     */
     private void refreshBookTable() {
         this.library.bookData.fireTableDataChanged();
     }
 
+    /**
+     * Frissíti a tagok adatait tartalmazó táblázatot.
+     */
     private void refreshMemberTable() {
         this.library.memberData.fireTableDataChanged();
     }

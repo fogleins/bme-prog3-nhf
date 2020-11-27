@@ -1,5 +1,8 @@
 import javax.swing.*;
 
+/**
+ * A könyvek kölcsönözhetőségét és kölcsönzését kezelő osztály.
+ */
 public class BorrowManager {
 
     /**

@@ -2,9 +2,21 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.util.List;
 
+/**
+ * A kölcsönzéseket megjelenítő {@code JTable} modellje.
+ */
 public class BorrowData extends DefaultTreeModel {
+    /**
+     * A könyvtári tagok listája.
+     */
     private List<Member> members;
 
+    /**
+     * Konstruktor
+     *
+     * @param root    A fa gyökere
+     * @param members A könyvtári tagok listája
+     */
     public BorrowData(DefaultMutableTreeNode root, List<Member> members) {
         super(root);
         this.members = members;
