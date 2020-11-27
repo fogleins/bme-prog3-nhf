@@ -17,9 +17,24 @@ class MemberManager {
      * Létrehoz egy tagok adatai megadását lehetővé tevő panelt a szükséges komponensekkel és lehetővé teszi a komponensek későbbi elérését és szerkesztését.
      */
     private static class MemberPanel extends JPanel {
+        /**
+         * Az adatok megadásának panele.
+         */
         JPanel mainPanel;
+
+        /**
+         * A tag neve.
+         */
         JTextField name;
+
+        /**
+         * A tag születési ideje.
+         */
         JFormattedTextField dateOfBirth;
+
+        /**
+         * A tag telefonszáma.
+         */
         JTextField phone;
 
         /**
@@ -37,7 +52,7 @@ class MemberManager {
 
             // a felhasználó által szerkeszthető komponensek létrehozása és panelhez adása
             JPanel input = new JPanel(new GridLayout(0, 1, 2, 2));
-            this.name = new JTextField();
+            this.name = new JTextField(10);
             this.dateOfBirth = new JFormattedTextField();
             try {
                 MaskFormatter dateMask = new MaskFormatter("####-##-##");
@@ -52,7 +67,7 @@ class MemberManager {
                     dateOfBirth.setCaretPosition(0);
                 }
             });
-            this.phone = new JTextField();
+            this.phone = new JTextField(10);
 
             // a TextField-ek margóját kicsit megnöveljük, ez nagyban segíti a dátum helyes megadását, ugyanis alapértelmezetten
             // a margók elég keskenyek (0), és a születési dátum megadásakor könnyű nem az első indexre helyezni a kurzort,
@@ -127,7 +142,9 @@ class MemberManager {
             if (isValidInput(name, dob, phone)) {
                 DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
                 LocalDate dateOfBirth = LocalDate.parse(dob, dateFormatter);
-                library.members.add(new Member(name, dateOfBirth, phone));
+                Member member = new Member(name, dateOfBirth, phone);
+                library.members.add(member);
+                library.memberData.membersComboBox.addItem(member);
             }
         }
     }
@@ -147,6 +164,7 @@ class MemberManager {
             for (Book book : books)
                 book.setBorrowedBy(null);
             library.members.remove(member);
+            library.memberData.membersComboBox.removeItem(member);
         }
     }
 }

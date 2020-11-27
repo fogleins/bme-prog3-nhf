@@ -64,7 +64,7 @@ public class Library implements Serializable {
             ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(serializationPath));
             outputStream.writeObject(this);
             outputStream.close();
-        } catch (Exception ex) {
+        } catch (Exception ex) { // TODO
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Hiba az adatok mentése során: A könyvek mentése sikertelen ("
                     + ex.getMessage() + ')', "Hiba az adatok mentése során", JOptionPane.ERROR_MESSAGE);
@@ -126,10 +126,14 @@ public class Library implements Serializable {
 
             library = new Library();
             library.initTransientVariables("library.libdat");
-        } catch (Exception ex) { // TODO: exception handling
-            ex.printStackTrace();
-            library = new Library();
-            library.initTransientVariables("library.libdat");
+        } catch (StreamCorruptedException streamCorruptedException) {
+            JOptionPane.showMessageDialog(null, "A megnyitni kívánt fájl sérült. Hibaüzenet: " + streamCorruptedException.getMessage(),
+                    "A fájl nem található", JOptionPane.ERROR_MESSAGE);
+            System.exit(-1);
+        } catch (Exception exception) { // IOException vagy ClassNotFoundException
+            JOptionPane.showMessageDialog(null, "Hiba a fájl beolvasása során. A program bezáródik. " +
+                    "Hibaüzenet: " + exception.getMessage(), "A fájl nem található", JOptionPane.ERROR_MESSAGE);
+            System.exit(-1);
         }
         return library;
     }
@@ -191,13 +195,13 @@ public class Library implements Serializable {
 
         // a felhasználó által szerkeszthető komponensek létrehozása és panelhez adása
         JPanel input = new JPanel(new GridLayout(0, 1, 2, 2));
-        JTextField author = new JTextField();
-        JTextField title = new JTextField();
-        JTextField year = new JTextField();
+        JTextField author = new JTextField(20);
+        JTextField title = new JTextField(20);
+        JTextField year = new JTextField(20);
         JComboBox<String> category = new JComboBox<>();
         for (BookCategory cat : BookCategory.values())
             category.addItem(cat.getLocalizedName());
-        JTextField language = new JTextField("magyar");
+        JTextField language = new JTextField("magyar", 20);
         ButtonGroup borrowableButtons = new ButtonGroup();
         JRadioButton yes = new JRadioButton("Igen");
         JRadioButton no = new JRadioButton("Nem", true);

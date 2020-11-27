@@ -200,8 +200,15 @@ public class ApplicationFrame extends JFrame {
         save.addActionListener(actionEvent -> library.saveData());
         JMenuItem saveAs = new JMenuItem("Mentés másként...");
         saveAs.addActionListener(actionEvent -> showSaveAsDialog());
+        JMenuItem exitWithoutSaving = new JMenuItem("Kilépés mentés nélkül");
+        exitWithoutSaving.addActionListener(actionEvent -> System.exit(0));
         JMenuItem exit = new JMenuItem("Kilépés");
-        exit.setAccelerator(KeyStroke.getKeyStroke('W', CTRL_DOWN_MASK)); // TODO: action listener
+        exit.setAccelerator(KeyStroke.getKeyStroke('W', CTRL_DOWN_MASK));
+        exit.addActionListener(actionEvent -> {
+            // mint az EXIT_ON_CLOSE
+            library.saveData();
+            System.exit(0);
+        });
 
         JMenu editMenu = new JMenu("Szerkesztés");
 
@@ -216,7 +223,7 @@ public class ApplicationFrame extends JFrame {
         remove.setAccelerator(KeyStroke.getKeyStroke("DELETE"));
         remove.addActionListener(actionEvent -> {
             if (bookTable.getSelectedRow() >= 0) {
-                library.removeBook(library.bookData.books.get(bookTable.convertRowIndexToModel(bookTable.getSelectedRow())));
+                library.removeBook(library.books.get(bookTable.convertRowIndexToModel(bookTable.getSelectedRow())));
                 updateBookCount();
             }
         });
@@ -225,6 +232,7 @@ public class ApplicationFrame extends JFrame {
         fileMenu.add(save);
         fileMenu.add(saveAs);
         fileMenu.addSeparator();
+        fileMenu.add(exitWithoutSaving);
         fileMenu.add(exit);
 
         libraryMenu.add(addNew);
@@ -268,7 +276,7 @@ public class ApplicationFrame extends JFrame {
         JButton removeBookButton = new JButton("Könyv eltávolítása");
         removeBookButton.addActionListener(actionEvent -> {
             if (bookTable.getSelectedRow() >= 0) {
-                library.removeBook(library.bookData.books.get(bookTable.convertRowIndexToModel(bookTable.getSelectedRow())));
+                library.removeBook(library.books.get(bookTable.convertRowIndexToModel(bookTable.getSelectedRow())));
                 updateBookCount();
                 reloadTree();
             }
