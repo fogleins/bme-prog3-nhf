@@ -1,14 +1,7 @@
 import javax.swing.*;
 import javax.swing.table.TableRowSorter;
-import javax.swing.text.MaskFormatter;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.io.*;
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.List;
 
@@ -152,94 +145,6 @@ public class Library implements Serializable {
         TableRowSorter<BookData> sorter = new TableRowSorter<>(bookData);
         sorter.setRowFilter(bookFilter);
         return sorter;
-    }
-
-    /**
-     * Megjelenít egy párbeszédablakot, amelyben megadhatók egy tag adatai, ha helyesek az adatok, hozzáadja a programhoz.
-     * Ha hibás adatokat ad meg a felhasználó, hibaüzenetet jelenít meg.
-     */
-    public void addMember() { // TODO: GUI-s részek elkülönítése
-        JPanel panel = new JPanel(new BorderLayout(5, 5)); // a JOptionPane fő panele
-
-        // Labelek létrehozása és panelhez adása
-        JPanel label = new JPanel(new GridLayout(0, 1, 2, 2)); // a JLabeleket tartalmazó panel
-        label.add(new JLabel("Név", SwingConstants.RIGHT));
-        label.add(new JLabel("Születési idő", SwingConstants.RIGHT));
-        label.add(new JLabel("Telefonszám", SwingConstants.RIGHT));
-        panel.add(label, BorderLayout.WEST);
-
-        // a felhasználó által szerkeszthető komponensek létrehozása és panelhez adása
-        JPanel input = new JPanel(new GridLayout(0, 1, 2, 2));
-        JTextField name = new JTextField();
-        JFormattedTextField dateOfBirthField = new JFormattedTextField();
-        try {
-            MaskFormatter dateMask = new MaskFormatter("####-##-##");
-            dateMask.install(dateOfBirthField);
-        } catch (ParseException ex) { // TODO
-            System.out.println("nem parse-olható");
-        }
-        JTextField phone = new JTextField("06301234567");
-        phone.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                String phoneFieldValue = phone.getText();
-                if (phoneFieldValue.equals("06301234567"))
-                    phone.setText("");
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                String phoneFieldValue = phone.getText();
-                if (phoneFieldValue.equals("") || !phoneFieldValue.matches("\\d+")) {
-                    phone.setText("06301234567");
-                }
-            }
-        });
-        input.add(name);
-        input.add(dateOfBirthField);
-        input.add(phone);
-        panel.add(input, BorderLayout.CENTER);
-
-        int chosenOption = JOptionPane.showConfirmDialog(null, panel, "Új könyvtári tag hozzáadása", JOptionPane.OK_CANCEL_OPTION);
-        if (chosenOption == JOptionPane.OK_OPTION) {
-            try {
-                // születési idő dátummá alakítása
-                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                LocalDate dateOfBirth = LocalDate.parse(dateOfBirthField.getText(), dateFormatter);
-                // adatok felvétele
-                Member newMember = new Member(name.getText(), dateOfBirth, phone.getText(), LocalDate.now());
-                this.memberData.addMember(newMember);
-            } catch (DateTimeParseException parseException) {
-                JOptionPane.showMessageDialog(null, "Hibás dátumformátumot adott meg. " +
-                        "Használja az éééé-hh-nn formátumot.", "Hibás dátumformátum", JOptionPane.ERROR_MESSAGE);
-            } catch (MissingRequiredArgumentException missingRequiredArgumentException) {
-                JOptionPane.showMessageDialog(null, missingRequiredArgumentException.getMessage(),
-                        "Hibás adatokat adott meg.", JOptionPane.WARNING_MESSAGE);
-            } catch (PersonAlreadyAddedException alreadyAddedException) {
-                JOptionPane.showMessageDialog(null, alreadyAddedException.getMessage(),
-                        "A felvenni kívánt tag már szerepel a programban", JOptionPane.WARNING_MESSAGE);
-            } catch (Exception exception) { // TODO: exception kezelése
-                exception.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Eltávolít egy könyvtári tagot a programból.
-     *
-     * @param member Az eltávolítandó {@code Member} objektum
-     */
-    public void removeMember(Member member) {
-        if (member == null)
-            return;
-        int chosenOption = JOptionPane.showConfirmDialog(null, "Biztosan törli a kiválasztott " +
-                "tagot? Ha van kölcsönzött könyve, az törlődik.", "Biztosan törli?", JOptionPane.YES_NO_OPTION);
-        if (chosenOption == JOptionPane.YES_OPTION) {
-            List<Book> books = member.getBorrowedBooks();
-            for (Book book : books)
-                book.setBorrowedBy(null);
-            this.memberData.removeMember(member);
-        }
     }
 
     /**

@@ -10,11 +10,11 @@ public class Member implements Serializable {
     private final LocalDate memberSince;
     private List<Book> borrowedBooks;
 
-    public Member(String name, LocalDate dateOfBirth, String phone, LocalDate memberSince) {
+    public Member(String name, LocalDate dateOfBirth, String phone) {
         this.name = name;
         this.dateOfBirth = dateOfBirth;
         this.phone = phone;
-        this.memberSince = memberSince;
+        this.memberSince = LocalDate.now();
         this.borrowedBooks = new ArrayList<>();
     }
 

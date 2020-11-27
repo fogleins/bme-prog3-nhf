@@ -67,8 +67,7 @@ public class MemberData extends AbstractTableModel {
             String name = (String) aValue;
             if (!name.equals(""))
                 members.get(rowIndex).setName(name);
-        }
-        else if (columnIndex == 2) {
+        } else if (columnIndex == 2) {
             String phone = (String) aValue;
             if (!phone.equals(""))
                 members.get(rowIndex).setPhone(phone);
@@ -77,35 +76,33 @@ public class MemberData extends AbstractTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex != 1 && columnIndex != 3;
-    }
-
-    private boolean listContains(Member member) {
-        for (Member m: members) {
-            if (m.getName().equals(member.getName()) && m.getDateOfBirth().isEqual(member.getDateOfBirth()) && m.getPhone().equals(member.getPhone()))
-                return true;
-        }
         return false;
     }
 
-    public void addMember(Member member) throws MissingRequiredArgumentException, PersonAlreadyAddedException {
-        if (member.getName().equals("") || member.getPhone().equals("06301234567"))
-            throw new MissingRequiredArgumentException();
-        if (listContains(member))
-            throw new PersonAlreadyAddedException(member + " már szerepel a programban, így nem lesz hozzáadva.");
-        members.add(member);
-        this.membersComboBox.addItem(member);
-        fireTableDataChanged();
-    }
-
-    public void addMember(String name, LocalDate dateOfBirth, String phone, LocalDate memberSince) throws MissingRequiredArgumentException, PersonAlreadyAddedException { // TODO: JOptionPane
-        addMember(new Member(name, dateOfBirth, phone, memberSince));
-    }
-
-    public void removeMember(Member member) {
-        this.members.remove(member);
-        fireTableDataChanged();
-    }
+//    private boolean listContains(Member member) {
+//        for (Member m: members) {
+//            if (m.getName().equals(member.getName()) && m.getDateOfBirth().isEqual(member.getDateOfBirth()) && m.getPhone().equals(member.getPhone()))
+//                return true;
+//        }
+//        return false;
+//    }
+//
+//    public void addMember(Member member) throws PersonAlreadyAddedException {
+//        if (listContains(member))
+//            throw new PersonAlreadyAddedException(member.toString().substring(0, member.toString().indexOf(':')) + " már szerepel a programban, így nem lesz hozzáadva.");
+//        members.add(member);
+//        this.membersComboBox.addItem(member);
+//        fireTableDataChanged();
+//    }
+//
+//    public void addMember(String name, LocalDate dateOfBirth, String phone) throws PersonAlreadyAddedException {
+//        addMember(new Member(name, dateOfBirth, phone));
+//    }
+//
+//    public void removeMember(Member member) {
+//        this.members.remove(member);
+//        fireTableDataChanged();
+//    }
 
     private void initComboBox() {
         this.membersComboBox = new JComboBox<>();

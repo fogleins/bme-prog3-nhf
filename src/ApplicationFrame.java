@@ -1,17 +1,11 @@
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import javax.swing.text.MaskFormatter;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 
@@ -26,7 +20,7 @@ public class ApplicationFrame extends JFrame {
     private JSplitPane verticalSplitPane;
     private JTextField searchBar;
     private JTree borrowersTree;
-    private Dimension size;
+    private Dimension windowSize;
 
     /**
      * Renderer a könyveket tartalmazó táblázathoz; a tárolt könyvek elérhetősége alapján más-más betűtípussal jeleníti meg a sorokat.
@@ -46,13 +40,10 @@ public class ApplicationFrame extends JFrame {
             if (borrowable)
                 if ((library.bookData.getValueAt(row, 6)) != null)
                     c.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-
                 else
                     c.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 12));
-            else {
+            else
                 c.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
-//                c.setBackground(new Color(0xEEEEEE));
-            }
             return c;
         }
 
@@ -95,9 +86,9 @@ public class ApplicationFrame extends JFrame {
      */
     private void initFrame() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.size = new Dimension(1280, 720);
-        this.setMinimumSize(size);
-        this.setPreferredSize(size);
+        this.windowSize = new Dimension(1280, 720);
+        this.setMinimumSize(windowSize);
+        this.setPreferredSize(windowSize);
         this.setLocationRelativeTo(null); // az ablak képernyő közepén való megjelenítéséhez
         this.setLayout(new BorderLayout());
 
@@ -118,19 +109,19 @@ public class ApplicationFrame extends JFrame {
                 int eWidth = e.getComponent().getWidth();
                 int horizontalDividerLocation = horizontalSplitPane.getDividerLocation();
                 if (horizontalDividerLocation > 0) {
-                    double proportionalLocation = horizontalDividerLocation / (double) size.width;
+                    double proportionalLocation = horizontalDividerLocation / (double) windowSize.width;
                     horizontalSplitPane.setDividerLocation((int) (eWidth * proportionalLocation));
                 } else { // alapértelmezetten 75%-ra állítjuk
                     horizontalSplitPane.setDividerLocation(0.75);
                 }
                 int verticalDividerLocation = verticalSplitPane.getDividerLocation();
                 if (verticalDividerLocation > 0) {
-                    double proportionalLocation = verticalDividerLocation / (double) size.height;
+                    double proportionalLocation = verticalDividerLocation / (double) windowSize.height;
                     verticalSplitPane.setDividerLocation((int) (eHeight * proportionalLocation));
                 } else { // alapértelmezetten 35%
                     verticalSplitPane.setDividerLocation(0.35);
                 }
-                size.setSize(eWidth, eHeight);
+                windowSize.setSize(eWidth, eHeight);
             }
         });
     }
@@ -307,69 +298,18 @@ public class ApplicationFrame extends JFrame {
         this.memberTable.setRowHeight(18);
         this.memberTable.setAutoCreateRowSorter(true);
         JScrollPane memberScrollPane = new JScrollPane(this.memberTable);
-//        this.memberTable.addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mousePressed(MouseEvent e) { // TODO: egyszerűsítés, általánosítás
-//                if (e.getClickCount() == 2) {
-//                    int row;
-//                    if ((row = memberTable.getSelectedRow()) > -1 && memberTable.getSelectedColumn() == 1) {
-//
-//
-//                        JPanel panel = new JPanel(new BorderLayout(5, 5)); // a JOptionPane fő panele
-//
-//                        // Labelek létrehozása és panelhez adása
-//                        JPanel label = new JPanel(new GridLayout(0, 1, 2, 2)); // a JLabeleket tartalmazó panel
-//                        label.add(new JLabel("Születési dátum (éééé-hh-nn): ", SwingConstants.RIGHT));
-//                        panel.add(label, BorderLayout.WEST);
-//
-//                        JPanel input = new JPanel(new GridLayout(0, 1, 2, 2));
-//                        JFormattedTextField dateOfBirthField = new JFormattedTextField();
-//                        dateOfBirthField.setColumns(6);
-//                        // alapértelmezetten a FormattedTextField margója nagyon keskeny, ami megnehezíti a MaskFormatter-rel
-//                        // való együttműködést, ezért a margót kicsit bővítjük
-//                        dateOfBirthField.setMargin(new Insets(0, 5, 0, 5));
-//                        try {
-//                            MaskFormatter dateMask = new MaskFormatter("####-##-##");
-//                            dateMask.install(dateOfBirthField);
-//                        } catch (ParseException ex) { // TODO
-//                            System.out.println("nem parse-olható");
-//                        }
-//                        input.add(dateOfBirthField);
-//                        panel.add(input, BorderLayout.CENTER);
-//
-//                        // JOptionPane-ben a TextField legyen fókuszban
-//                        // TODO: mire kattintott?
-//                        JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
-//                            @Override
-//                            public void selectInitialValue() {
-//                                dateOfBirthField.requestFocusInWindow();
-//                            }
-//                        };
-//                        pane.createDialog(null, "Születési dátum szerkesztése").setVisible(true);
-//
-//
-//                        // TODO: jó, de OptionDialog int chosenOption = JOptionPane.showOptionDialog(null, new Object[] {panel}, "decryptionKey", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, new Object[] {"okCaption", "cancelCaption"}, null);
-//
-//
-//                        int chosenOption = JOptionPane.showConfirmDialog(null, panel, "Születési dátum szerkesztése",
-//                                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-//                        String inp = dateOfBirthField.getText();
-//
-//                        if (inp != null && chosenOption == JOptionPane.OK_OPTION) {
-//                            try {
-//                                DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//                                library.memberData.members.get(memberTable.convertRowIndexToModel(row)).setDateOfBirth(LocalDate.parse(inp, dateFormatter));
-//                                System.out.println(LocalDate.parse(inp, dateFormatter).isAfter(LocalDate.now()));
-//                            } catch (DateTimeParseException parseException) {
-//                                JOptionPane.showMessageDialog(null, "Hibás dátumformátumot adott meg. " +
-//                                        "Használja az éééé-hh-nn formátumot.", "Hibás dátumformátum", JOptionPane.ERROR_MESSAGE);
-//                            }
-//                            library.memberData.fireTableDataChanged();
-//                        }
-//                    }
-//                }
-//            }
-//        });
+
+        // ha egy tag adataira kétszer kattintanak, megnyitjuk a szerkesztés párbeszédablakot
+        this.memberTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+                    MemberManager.editMemberDialog(library.members.get(memberTable.getSelectedRow()));
+                    refreshComponents();
+                }
+            }
+        });
+
         // panel
         JPanel membersPanel = new JPanel(new BorderLayout());
         membersPanel.setBorder(BorderFactory.createTitledBorder("Könyvtári tagok"));
@@ -377,23 +317,21 @@ public class ApplicationFrame extends JFrame {
         membersComponentPanel.setLayout(new BoxLayout(membersComponentPanel, BoxLayout.X_AXIS));
         JButton addMember = new JButton("Tag hozzáadása...");
         addMember.addActionListener(actionEvent -> {
-            library.addMember();
+            MemberManager.addMemberDialog(this.library);
+            refreshMemberTable();
             reloadTree();
         });
         membersComponentPanel.add(addMember);
         JButton removeMember = new JButton("Tag eltávolítása");
         removeMember.addActionListener(actionEvent -> {
             if (memberTable.getSelectedRow() >= 0) {
-                library.removeMember(library.memberData.members.get(
+                MemberManager.removeMember(this.library, library.memberData.members.get(
                         memberTable.convertRowIndexToModel(memberTable.getSelectedRow())));
-                reloadTree();
-                refreshBookTable();
+                refreshComponents();
             }
         });
-        this.memberTable.addPropertyChangeListener(propertyChangeEvent -> {
-            reloadTree();
-            refreshBookTable();
-        });
+        // ha egy tag adatait szerkesztik, frissítjük a releváns komponenseket
+        this.memberTable.addPropertyChangeListener(propertyChangeEvent -> refreshComponents());
         membersComponentPanel.add(removeMember);
         membersPanel.add(membersComponentPanel, BorderLayout.NORTH);
 
@@ -447,8 +385,20 @@ public class ApplicationFrame extends JFrame {
     }
 
     private void refreshBookTable() {
-        AbstractTableModel ad = (AbstractTableModel) this.bookTable.getModel();
-        ad.fireTableDataChanged();
+        this.library.bookData.fireTableDataChanged();
+    }
+
+    private void refreshMemberTable() {
+        this.library.memberData.fireTableDataChanged();
+    }
+
+    /**
+     * Frissíti az aktuális kölcsönzéseket megjelenítő fa nézetet és a tagokat, valamint a könyveket megjelenítő táblázatokat
+     */
+    private void refreshComponents() {
+        refreshMemberTable();
+        refreshBookTable();
+        reloadTree();
     }
 
     /**
@@ -475,17 +425,6 @@ public class ApplicationFrame extends JFrame {
      */
     private void updateBookCount() {
         this.searchBar.setText("Keresés " + library.bookData.books.size() + " könyv között");
-    }
-
-    private LocalDate stringToLocalDate(String s) {
-        try {
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            return LocalDate.parse(s, dateFormatter);
-        } catch (DateTimeParseException parseException) {
-            JOptionPane.showMessageDialog(null, "Hibás dátumformátumot adott meg. " +
-                    "Használja az éééé-hh-nn formátumot.", "Hibás dátumformátum", JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
     }
 
     /**
