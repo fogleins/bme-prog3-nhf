@@ -22,32 +22,32 @@ public class ApplicationFrame extends JFrame {
     /**
      * A könyveket tartalmazó {@code JTable} objektum.
      */
-    private JTable bookTable;
+    private final JTable bookTable;
 
     /**
      * A könyvtári tagokat tartalmazó {@code JTable} objektum.
      */
-    private JTable memberTable;
+    private final JTable memberTable;
 
     /**
      * Az ablak északi panele, amin megjelenik a tagokat tartalmazó táblázat és az aktuális kölcsönzéseket nyilvántartó fa struktúra.
      */
-    private JPanel northPanel;
+    private final JPanel northPanel;
 
     /**
      * A képernyőt vízszintesen két részre osztó {@code JSplitPane} objektum, mely tartalmazza az északi panelt és a könyvek táblázatát.
      */
-    private JSplitPane horizontalSplitPane;
+    private final JSplitPane horizontalSplitPane;
 
     /**
      * Az északi panel komponenseit függőlegesen kettéválasztó {@code JSplitPane} objektum.
      */
-    private JSplitPane verticalSplitPane;
+    private final JSplitPane verticalSplitPane;
 
     /**
      * A könyvek közti kereséshez használt szövegmező.
      */
-    private JTextField searchBar;
+    private BookSearchBar searchBar;
 
     /**
      * A kölcsönzések nyilvántartására használt {@code JTree} objektum.
@@ -63,9 +63,9 @@ public class ApplicationFrame extends JFrame {
     private Dimension windowSize;
 
     /**
-     * Renderer a könyveket tartalmazó táblázathoz; a tárolt könyvek elérhetősége alapján más-más betűtípussal jeleníti meg a sorokat.
+     * Renderer a könyveket tartalmazó táblázathoz; a tárolt könyvek elérhetősége alapján más-más betűstílussal jeleníti meg a sorokat.
      */
-    private class BookTableCellRenderer implements TableCellRenderer { // TODO: maradjon?
+    private class BookTableCellRenderer implements TableCellRenderer {
 
         /**
          * A táblázat renderere.
@@ -73,9 +73,9 @@ public class ApplicationFrame extends JFrame {
         private final TableCellRenderer renderer;
 
         /**
-         * // TODO
+         * Konstruktor. Beállítja a táblázat rendererét.
          *
-         * @param renderer
+         * @param renderer A táblázat renderere
          */
         public BookTableCellRenderer(TableCellRenderer renderer) {
             this.renderer = renderer;
@@ -83,18 +83,18 @@ public class ApplicationFrame extends JFrame {
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            Component c = renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            boolean borrowable = (boolean) (library.bookData.getValueAt(row, 5));
-            if (borrowable)
-                if ((library.bookData.getValueAt(row, 6)) != null)
-                    c.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-                else
-                    c.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 12));
-            else
-                c.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
-            return c;
-        }
+            Component component = renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            boolean borrowable = library.books.get(bookTable.convertRowIndexToModel(row)).isBorrowable();
 
+            if (borrowable)
+                if ((library.books.get(bookTable.convertRowIndexToModel(row)).getBorrowedBy()) != null)
+                    component.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+                else
+                    component.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 12));
+            else
+                component.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+            return component;
+        }
     }
 
     /**
@@ -139,6 +139,33 @@ public class ApplicationFrame extends JFrame {
     }
 
     /**
+     * Megjelenít egy könyv adatinak megadását lehetővé tevő ablakot. Ha valamelyik adat hibás, hibaüzenetet ad.
+     */
+    private void showAddBookDialog() {
+        BookPanel bookPanel = new BookPanel();
+        int chosenOption = JOptionPane.showConfirmDialog(null, bookPanel.getMainPanel(), "Új könyv felvétele", JOptionPane.OK_CANCEL_OPTION);
+        if (chosenOption == JOptionPane.OK_OPTION)
+            if (!library.addBook(bookPanel.getAuthor(), bookPanel.getTitle(), bookPanel.getYear(),
+                    BookCategory.valueOf(bookPanel.getCategory(), "HU"), bookPanel.getLanguage(), bookPanel.isBorrowable()))
+                JOptionPane.showMessageDialog(null, "Hibás adat került megadásra. Ellenőrizze " +
+                        "a megadott adatokat.", "Hibás adat", JOptionPane.WARNING_MESSAGE);
+    }
+
+    /**
+     * Megkérdezi a felhasználót, hogy biztosan törölni szeretné-e a könyvet; ha igen, törli.
+     */
+    private void showRemoveBookDialog() {
+        if (bookTable.getSelectedRow() >= 0) {
+            Book book = library.books.get(bookTable.convertRowIndexToModel(bookTable.getSelectedRow()));
+            int chosenOption = JOptionPane.showConfirmDialog(null,
+                    (book.getBorrowedBy() == null) ? "Biztosan törli a kiválasztott könyvet?" : "A kiválasztott könyvet kikölcsönözték. Biztosan törli?",
+                    "Biztosan törli?", JOptionPane.YES_NO_OPTION);
+            if (chosenOption == JOptionPane.YES_OPTION)
+                library.remove(book);
+        }
+    }
+
+    /**
      * Beállítja az ablak tulajdonságait
      */
     private void initFrame() {
@@ -162,21 +189,25 @@ public class ApplicationFrame extends JFrame {
         this.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
+                int horizontalDividerLocation = horizontalSplitPane.getDividerLocation();
+                int verticalDividerLocation = verticalSplitPane.getDividerLocation();
+                // alapértelmezett értékek
+                if (windowSize.width == 1280 && windowSize.height == 720
+                        && (horizontalDividerLocation == 464 || horizontalDividerLocation < 0)
+                        && (verticalDividerLocation == 78 || verticalDividerLocation < 0)) {
+                    horizontalSplitPane.setDividerLocation(0.75);
+                    verticalSplitPane.setDividerLocation(0.35);
+                    return;
+                }
                 int eHeight = e.getComponent().getHeight();
                 int eWidth = e.getComponent().getWidth();
-                int horizontalDividerLocation = horizontalSplitPane.getDividerLocation();
                 if (horizontalDividerLocation > 0) {
                     double proportionalLocation = horizontalDividerLocation / (double) windowSize.width;
                     horizontalSplitPane.setDividerLocation((int) (eWidth * proportionalLocation));
-                } else { // alapértelmezetten 75%-ra állítjuk
-                    horizontalSplitPane.setDividerLocation(0.75);
                 }
-                int verticalDividerLocation = verticalSplitPane.getDividerLocation();
                 if (verticalDividerLocation > 0) {
                     double proportionalLocation = verticalDividerLocation / (double) windowSize.height;
                     verticalSplitPane.setDividerLocation((int) (eHeight * proportionalLocation));
-                } else { // alapértelmezetten 35%
-                    verticalSplitPane.setDividerLocation(0.35);
                 }
                 windowSize.setSize(eWidth, eHeight);
             }
@@ -215,18 +246,10 @@ public class ApplicationFrame extends JFrame {
         JMenu libraryMenu = new JMenu("Könyvtár");
         JMenuItem addNew = new JMenuItem("Új könyv hozzáadása");
         addNew.setAccelerator(KeyStroke.getKeyStroke('N', CTRL_DOWN_MASK));
-        addNew.addActionListener(e -> {
-            library.addBook();
-            updateBookCount();
-        });
+        addNew.addActionListener(e -> showAddBookDialog());
         JMenuItem remove = new JMenuItem("Könyv eltávolítása");
         remove.setAccelerator(KeyStroke.getKeyStroke("DELETE"));
-        remove.addActionListener(actionEvent -> {
-            if (bookTable.getSelectedRow() >= 0) {
-                library.removeBook(library.books.get(bookTable.convertRowIndexToModel(bookTable.getSelectedRow())));
-                updateBookCount();
-            }
-        });
+        remove.addActionListener(actionEvent -> showRemoveBookDialog());
 
         fileMenu.add(open);
         fileMenu.add(save);
@@ -255,6 +278,13 @@ public class ApplicationFrame extends JFrame {
         // ha változik a könyvek valamilyen adata, az aktuális kölcsönzések fáját is frissítjük
         this.bookTable.addPropertyChangeListener(propertyChangeEvent -> reloadTree());
         JScrollPane bookScrollPane = new JScrollPane(this.bookTable);
+        bookTable.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                searchBar.update();
+                reloadTree();
+            }
+        });
 
         // Panelek
         JPanel booksPanel = new JPanel();
@@ -267,29 +297,13 @@ public class ApplicationFrame extends JFrame {
 
         booksNorthPanel.setLayout(northPanelLayout);
         JButton addBookButton = new JButton("Könyv hozzáadása...");
-        addBookButton.addActionListener(actionEvent -> {
-            library.addBook();
-            updateBookCount();
-        });
+        addBookButton.addActionListener(actionEvent -> showAddBookDialog());
         booksNorthPanel.add(addBookButton);
         booksNorthPanel.add(Box.createHorizontalGlue());
         JButton removeBookButton = new JButton("Könyv eltávolítása");
-        removeBookButton.addActionListener(actionEvent -> {
-            if (bookTable.getSelectedRow() >= 0) {
-                library.removeBook(library.books.get(bookTable.convertRowIndexToModel(bookTable.getSelectedRow())));
-                updateBookCount();
-                reloadTree();
-            }
-        });
+        removeBookButton.addActionListener(actionEvent -> showRemoveBookDialog());
         booksNorthPanel.add(removeBookButton);
         booksNorthPanel.add(Box.createHorizontalGlue());
-        JCheckBox showBorrowedBooksOnly = new JCheckBox("Csak a kölcsönzött könyvek mutatása");
-        showBorrowedBooksOnly.addActionListener(actionEvent -> {
-            if (showBorrowedBooksOnly.isSelected())
-                bookTable.setRowSorter(library.showBorrowedOnly());
-            else bookTable.setAutoCreateRowSorter(true);
-        });
-        booksNorthPanel.add(showBorrowedBooksOnly);
 
         // keresés komponensei
         JCheckBox searchAuthorToo = new JCheckBox("Keresés a szerzők nevében is");
@@ -298,44 +312,39 @@ public class ApplicationFrame extends JFrame {
             if (!searchBarText.equals("Keresés " + library.books.size() + " könyv között"))
                 bookTable.setRowSorter(library.search(searchBarText, searchAuthorToo.isSelected()));
         });
-        this.searchBar = new JTextField();
-        updateBookCount();
-        searchBar.addFocusListener(new FocusAdapter() { // a mezőbe kattintáskor eltűnik a szöveg
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (searchBar.getText().equals("Keresés " + library.books.size() + " könyv között"))
-                    searchBar.setText("");
-            }
+        // szűrés a kölcsönzött könyvekre
+        JCheckBox showBorrowedBooksOnly = new JCheckBox("Csak a kölcsönzött könyvek mutatása");
+        showBorrowedBooksOnly.addActionListener(actionEvent -> {
+            if (showBorrowedBooksOnly.isSelected())
+                bookTable.setRowSorter(library.showBorrowedOnly());
+            else if (!searchBar.getText().equals(searchBar.getCurrentPlaceholderText()))
+                bookTable.setRowSorter(library.search(searchBar.getText(), searchAuthorToo.isSelected()));
+            else bookTable.setAutoCreateRowSorter(true);
         });
-        searchBar.addFocusListener(new FocusAdapter() { // ha inaktív lesz a mező, a szöveg újból megjelenik
-            @Override
-            public void focusLost(FocusEvent e) {
-                String searchBarText = searchBar.getText();
-                if (searchBarText.equals("Keresés " + library.books.size() + " könyv között") || searchBarText.equals(""))
-                    updateBookCount();
-            }
-        });
+        booksNorthPanel.add(showBorrowedBooksOnly);
 
+        // keresés mező
+        this.searchBar = new BookSearchBar(library.books);
         searchBar.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 String searchBarText = searchBar.getText();
-                if (!searchBarText.equals("Keresés " + library.books.size() + " könyv között")) {
+                if (!searchBarText.equals(searchBar.getCurrentPlaceholderText())) {
                     bookTable.setRowSorter(library.search(searchBarText, searchAuthorToo.isSelected()));
-                    System.out.println("insertUpdate");
                 }
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                String searchBarText = searchBar.getText();
-                bookTable.setRowSorter(library.search(searchBarText, searchAuthorToo.isSelected()));
+                // keresés az összes könyv között
+                if (showBorrowedBooksOnly.isSelected())
+                    showBorrowedBooksOnly.doClick();
+                bookTable.setRowSorter(library.search(searchBar.getText(), searchAuthorToo.isSelected()));
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                String searchBarText = searchBar.getText();
-                bookTable.setRowSorter(library.search(searchBarText, searchAuthorToo.isSelected()));
+                bookTable.setRowSorter(library.search(searchBar.getText(), searchAuthorToo.isSelected()));
             }
         });
         booksNorthPanel.add(searchBar);
@@ -345,7 +354,7 @@ public class ApplicationFrame extends JFrame {
         booksPanel.add(bookScrollPane, BorderLayout.CENTER);
         this.verticalSplitPane.add(booksPanel);
 
-        // CellRendererek beállítása TODO: maradjon?
+        // CellRendererek beállítása
         bookTable.setDefaultRenderer(String.class, new BookTableCellRenderer(bookTable.getDefaultRenderer(String.class)));
         bookTable.setDefaultRenderer(Integer.class, new BookTableCellRenderer(bookTable.getDefaultRenderer(Integer.class)));
         bookTable.setDefaultRenderer(Boolean.class, new BookTableCellRenderer(bookTable.getDefaultRenderer(Boolean.class)));
@@ -369,11 +378,41 @@ public class ApplicationFrame extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    MemberManager.editMemberDialog(library.members.get(memberTable.getSelectedRow()));
-                    refreshComponents();
+                    Member member = library.members.get(memberTable.convertRowIndexToModel(memberTable.getSelectedRow()));
+                    MemberPanel memberPanel = new MemberPanel();
+                    memberPanel.setNameValue(member.getName());
+                    memberPanel.setDateOfBirth(member.getDateOfBirth().toString());
+                    memberPanel.setPhone(member.getPhone());
+                    int chosenOption = JOptionPane.showConfirmDialog(null, memberPanel.getMainPanel(),
+                            "Tag adatainak szerkesztése", JOptionPane.OK_CANCEL_OPTION);
+                    if (chosenOption == JOptionPane.OK_OPTION)
+                        if (!library.editMember(member, memberPanel.getNameValue(), memberPanel.getDateOfBirthValue(), memberPanel.getPhoneValue()))
+                            JOptionPane.showMessageDialog(null, "Hibás adat került megadásra. Ellenőrizze, " +
+                                    "hogy helyesen adta-e meg a formátumokat.", "Hibás adat", JOptionPane.WARNING_MESSAGE);
+
+//                    refreshComponents(); // TODO
                 }
             }
         });
+
+        // TODO: member modellnek add() függvénye fire...() legyen
+//        this.memberTable.addPropertyChangeListener(new PropertyChangeListener() {
+//            @Override
+//            public void propertyChange(PropertyChangeEvent evt) {
+//                library.memberData.fireTableDataChanged();
+//                library.bookData.fireTableDataChanged();
+//                reloadTree();
+//            }
+//        });
+//
+//        memberTable.getModel().addTableModelListener(new TableModelListener() {
+//            @Override
+//            public void tableChanged(TableModelEvent e) {
+//                library.memberData.fireTableDataChanged();
+//                library.bookData.fireTableDataChanged();
+//                reloadTree();
+//            }
+//        });
 
         // panel
         JPanel membersPanel = new JPanel(new BorderLayout());
@@ -382,21 +421,34 @@ public class ApplicationFrame extends JFrame {
         membersComponentPanel.setLayout(new BoxLayout(membersComponentPanel, BoxLayout.X_AXIS));
         JButton addMember = new JButton("Tag hozzáadása...");
         addMember.addActionListener(actionEvent -> {
-            MemberManager.addMemberDialog(this.library);
-            refreshMemberTable();
-            reloadTree();
+            MemberPanel memberPanel = new MemberPanel();
+            if (JOptionPane.showConfirmDialog(null, memberPanel.getMainPanel(),
+                    "Tag hozzáadása", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+                String name = memberPanel.getNameValue();
+                String dob = memberPanel.getDateOfBirthValue();
+                String phone = memberPanel.getPhoneValue();
+                if (!library.addMember(name, dob, phone))
+                    JOptionPane.showMessageDialog(null, "Hibás adat került megadásra. Ellenőrizze, " +
+                            "hogy helyesen adta-e meg a formátumokat.", "Hibás adat", JOptionPane.WARNING_MESSAGE);
+            }
+//            refreshMemberTable(); // TODO
+//            reloadTree();
         });
         membersComponentPanel.add(addMember);
         JButton removeMember = new JButton("Tag eltávolítása");
         removeMember.addActionListener(actionEvent -> {
             if (memberTable.getSelectedRow() >= 0) {
-                MemberManager.removeMember(this.library, library.memberData.members.get(
-                        memberTable.convertRowIndexToModel(memberTable.getSelectedRow())));
-                refreshComponents();
+                int chosenOption = JOptionPane.showConfirmDialog(null, "Biztosan törli a kiválasztott " +
+                        "tagot? Ha van kölcsönzött könyve, az törlődik.", "Biztosan törli?", JOptionPane.YES_NO_OPTION);
+                if (chosenOption == JOptionPane.YES_OPTION)
+                    library.remove(library.members.get(memberTable.convertRowIndexToModel(memberTable.getSelectedRow())));
+
+                refreshComponents(); // TODO
             }
         });
         // ha egy tag adatait szerkesztik, frissítjük a releváns komponenseket
-        this.memberTable.addPropertyChangeListener(propertyChangeEvent -> refreshComponents());
+        // FIXME
+//        this.memberTable.addPropertyChangeListener(propertyChangeEvent -> refreshComponents()); // TODO
         membersComponentPanel.add(removeMember);
         membersPanel.add(membersComponentPanel, BorderLayout.NORTH);
 
@@ -424,7 +476,6 @@ public class ApplicationFrame extends JFrame {
 
         JScrollPane borrowersScrollPane = new JScrollPane(borrowersTree);
         this.northPanel.add(borrowersScrollPane);
-//        this.borrowersTree.setBackground(this.northPanel.getBackground());  // TODO: szöveg bg változtatása?
 
 
         JPanel treePanel = new JPanel(new BorderLayout());
@@ -438,8 +489,11 @@ public class ApplicationFrame extends JFrame {
      */
     private void reloadTree() {
         if (ApplicationFrame.this.borrowersTree != null) {
-            DefaultTreeModel treeModel = (DefaultTreeModel) ApplicationFrame.this.borrowersTree.getModel();
-            treeModel.reload();
+            // TODO
+//            DefaultTreeModel treeModel = (DefaultTreeModel) ApplicationFrame.this.borrowersTree.getModel();
+//            treeModel.reload();
+            ((BorrowData) borrowersTree.getModel()).reload();
+            // mindig teljesen kinyitva jelenítjük meg
             for (int i = 0; i < ApplicationFrame.this.borrowersTree.getRowCount(); i++) {
                 borrowersTree.expandRow(i);
             }
@@ -489,13 +543,6 @@ public class ApplicationFrame extends JFrame {
     }
 
     /**
-     * Frissíti a könyvek számát a keresés mezőben
-     */
-    private void updateBookCount() {
-        this.searchBar.setText("Keresés " + library.bookData.books.size() + " könyv között");
-    }
-
-    /**
      * Konstruktor
      */
     public ApplicationFrame() {
@@ -505,9 +552,11 @@ public class ApplicationFrame extends JFrame {
 
         this.horizontalSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         this.horizontalSplitPane.setOneTouchExpandable(true);
+        this.horizontalSplitPane.setContinuousLayout(true);
         this.verticalSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         this.verticalSplitPane.add(this.horizontalSplitPane);
         this.verticalSplitPane.setOneTouchExpandable(true); // a két rész külön-külön megjeleníthető
+        this.verticalSplitPane.setContinuousLayout(true);
         this.bookTable = new JTable();
         this.memberTable = new JTable();
         readDataFromFile();

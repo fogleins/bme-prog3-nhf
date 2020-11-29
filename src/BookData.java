@@ -97,9 +97,9 @@ public class BookData extends AbstractTableModel {
     }
 
     // TODO: javadoc vagy áthelyezés?
-    public void addBook(Book book) throws MissingRequiredArgumentException {
-        if (book.getAuthor() == null || book.getYearOfPublication() == 0 || book.getTitle().equals("") || book.getLanguage().equals(""))
-            throw new MissingRequiredArgumentException();
+    public void addBook(Book book)/* throws MissingRequiredArgumentException */{
+//        if (book.getAuthor() == null || book.getYearOfPublication() == 0 || book.getTitle().equals("") || book.getLanguage().equals(""))
+//            throw new MissingRequiredArgumentException();
         books.add(book);
         fireTableDataChanged();
     }

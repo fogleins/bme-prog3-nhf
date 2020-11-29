@@ -1,7 +1,9 @@
 import javax.swing.*;
 import javax.swing.table.TableRowSorter;
-import java.awt.*;
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.List;
 
@@ -110,7 +112,7 @@ public class Library implements Serializable {
      * Beolvas egy könyvtár objektumot adatfájlból.
      *
      * @param library A felülírandó {@code Library} objektum
-     * @return A beolvasott {@code Library} objektum, ha a beolvasás nem sikerül, új üres könyvtárat hoz létre
+     * @return A beolvasott {@code Library} objektum, ha a fájl nem található, új üres könyvtárat hoz létre
      */
     public static Library readDataFromFile(Library library) {
         try {
@@ -177,81 +179,43 @@ public class Library implements Serializable {
     }
 
     /**
-     * Megjelenít egy párbeszédablakot, amelyben megadhatók egy könyv adatai. Ha az adatok helyesek, hozzáadja a programhoz.
-     * Ha hibás adatokat adott meg a felhasználó, hibaüzenet jelenik meg.
+     * Ellenőrzi, hogy a paraméterül kapott adatok lehetnek-e egy könyv adatai.
+     *
+     * @param author   A könyv szerzője
+     * @param title    A könyv címe
+     * @param year     A könyv kiadási éve
+     * @param language A könyv nyelve
+     * @return Hamis, ha legalább egy paraméter nem felel meg az elvárt formátumnak, egyébként igaz
      */
-    public void addBook() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5)); // a JOptionPane fő panele
-
-        // Labelek létrehozása és panelhez adása
-        JPanel label = new JPanel(new GridLayout(0, 1, 2, 2)); // a JLabeleket tartalmazó panel
-        label.add(new JLabel("Szerző", SwingConstants.RIGHT));
-        label.add(new JLabel("Cím", SwingConstants.RIGHT));
-        label.add(new JLabel("Kiadás éve", SwingConstants.RIGHT));
-        label.add(new JLabel("Kategória", SwingConstants.RIGHT));
-        label.add(new JLabel("Nyelv", SwingConstants.RIGHT));
-        label.add(new JLabel("Kölcsönözhető?", SwingConstants.RIGHT));
-        panel.add(label, BorderLayout.WEST);
-
-        // a felhasználó által szerkeszthető komponensek létrehozása és panelhez adása
-        JPanel input = new JPanel(new GridLayout(0, 1, 2, 2));
-        JTextField author = new JTextField(20);
-        JTextField title = new JTextField(20);
-        JTextField year = new JTextField(20);
-        JComboBox<String> category = new JComboBox<>();
-        for (BookCategory cat : BookCategory.values())
-            category.addItem(cat.getLocalizedName());
-        JTextField language = new JTextField("magyar", 20);
-        ButtonGroup borrowableButtons = new ButtonGroup();
-        JRadioButton yes = new JRadioButton("Igen");
-        JRadioButton no = new JRadioButton("Nem", true);
-        JPanel buttons = new JPanel(); // az Igen-Nem lehetőségek panele
-        buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
-        buttons.add(yes);
-        buttons.add(no);
-        borrowableButtons.add(yes);
-        borrowableButtons.add(no);
-        input.add(author);
-        input.add(title);
-        input.add(year);
-        input.add(category);
-        input.add(language);
-        input.add(buttons, BorderLayout.WEST);
-        panel.add(input, BorderLayout.CENTER);
-
-        int chosenOption = JOptionPane.showConfirmDialog(null, panel, "Új könyv felvétele", JOptionPane.OK_CANCEL_OPTION);
-        if (chosenOption == JOptionPane.OK_OPTION) {
-            try {
-                // booleanná alakítás
-                String chosenRadioButton = "";
-                for (Enumeration<AbstractButton> buttonsEnum = borrowableButtons.getElements(); buttonsEnum.hasMoreElements(); ) {
-                    AbstractButton button = buttonsEnum.nextElement();
-
-                    if (button.isSelected()) {
-                        chosenRadioButton = button.getText();
-                        break;
-                    }
-                }
-
-                // kiadási év intté alakítása
-                int yearOfPublication;
-                try {
-                    yearOfPublication = Integer.parseInt(year.getText());
-                } catch (NumberFormatException numberFormatException) {
-                    yearOfPublication = 0;
-                }
-
-                // könyv létrehozása és gyűjteményhez adása
-                Book newBook = new Book(author.getText(), title.getText(), yearOfPublication,
-                        BookCategory.valueOf((String) category.getSelectedItem(), "HU"),
-                        language.getText().toLowerCase(), chosenRadioButton.equals("Igen"));
-                this.bookData.addBook(newBook);
-            } catch (MissingRequiredArgumentException argumentException) {
-                JOptionPane.showMessageDialog(null, "Hibás adatokat adott meg.", "Hibás adat", JOptionPane.ERROR_MESSAGE);
-            } catch (Exception exception) { // TODO: exception kezelése
-                exception.printStackTrace();
-            }
+    private static boolean isValidBookInput(String author, String title, String year, String language) {
+        if (author.equals("") || title.equals("") || language.equals(""))
+            return false;
+        try {
+            Integer.parseInt(year);
+        } catch (NumberFormatException numberFormatException) {
+            return false;
         }
+        return true;
+    }
+
+    /**
+     * A könyvtárhoz ad egy könyvet, ha a megadott adatai helyesek.
+     *
+     * @param author       A könyv szerzője
+     * @param title        A könyv címe
+     * @param year         A könyv kiadási éve
+     * @param category     A könyv típusa
+     * @param language     A könyv nyelve
+     * @param isBorrowable A könyv kölöcsönözhetősége
+     * @return Igaz, ha a könyv adatai érvényesek voltak és a hozzáadás sikerült, egyébként hamis
+     */
+    public boolean addBook(String author, String title, String year, BookCategory category, String language, boolean isBorrowable) {
+        if (isValidBookInput(author, title, year, language)) {
+            Book book = new Book(author, title, Integer.parseInt(year), category, language, isBorrowable);
+            this.bookData.addBook(book);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -259,16 +223,84 @@ public class Library implements Serializable {
      *
      * @param book Az eltávolítandó {@code Book} objektum
      */
-    public void removeBook(Book book) {
+    public void remove(Book book) {
         if (book == null)
             return;
-        int chosenOption = JOptionPane.showConfirmDialog(null,
-                (book.getBorrowedBy() == null) ? "Biztosan törli a kiválasztott könyvet?" : "A kiválasztott könyvet kikölcsönözték. Biztosan törli?",
-                "Biztosan törli?", JOptionPane.YES_NO_OPTION);
-        if (chosenOption == JOptionPane.YES_OPTION) {
-            if (book.getBorrowedBy() != null)
-                book.getBorrowedBy().getBorrowedBooks().remove(book);
-            this.bookData.removeBook(book);
+        if (book.getBorrowedBy() != null)
+            book.getBorrowedBy().getBorrowedBooks().remove(book);
+        this.bookData.removeBook(book);
+    }
+
+    /**
+     * Megvizsgálja, hogy a paraméterül kapott adatok érvényesek-e, lehetnek-e egy {@code Member} adatai.
+     *
+     * @param name  A felhasználó által megadott név
+     * @param dob   A felhasználó által megadott születési idő
+     * @param phone A felhasználó által megadott telefonszám
+     * @return Hamis, ha valamelyik paraméter nem felel meg az elvárt formátumnak, egyébként igaz
+     */
+    private static boolean isValidMemberInput(String name, String dob, String phone) {
+        if (name.equals("") || !(phone.matches("\\d+") || phone.equals("")))
+            return false;
+        try {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate.parse(dob, dateFormatter);
+        } catch (DateTimeParseException parseException) {
+            return false;
         }
+        return true;
+    }
+
+    /**
+     * Hozzáad egy tagot a programhoz.
+     *
+     * @param name  A tag neve
+     * @param dob   A tag születési ideje
+     * @param phone A tag telefonszáma
+     */
+    public boolean addMember(String name, String dob, String phone) {
+        if (isValidMemberInput(name, dob, phone)) {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate dateOfBirth = LocalDate.parse(dob, dateFormatter);
+            Member member = new Member(name, dateOfBirth, phone);
+            this.memberData.membersComboBox.addItem(member); // TODO: MemberData-ba?
+            return this.members.add(member);
+        }
+        return false;
+    }
+
+    /**
+     * Szerkeszti egy tag adatait.
+     *
+     * @param member A tag, akinek az adatait módosítani szeretnénk
+     * @param name   A tag új neve
+     * @param dob    A tag új születési dátuma
+     * @param phone  A tag új telefonszáma
+     * @return Igaz, ha a módosítást sikerült végrehajtani
+     */
+    public boolean editMember(Member member, String name, String dob, String phone) {
+        if (isValidMemberInput(name, dob, phone)) {
+            member.setName(name);
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            member.setDateOfBirth(LocalDate.parse(dob, dateFormatter));
+            member.setPhone(phone);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Eltávolít egy tagot a programból.
+     *
+     * @param member Az eltávolítandó tag
+     */
+    public void remove(Member member) {
+        if (member == null)
+            return;
+        List<Book> books = member.getBorrowedBooks();
+        for (Book book : books)
+            book.setBorrowedBy(null);
+        this.members.remove(member);
+        this.memberData.membersComboBox.removeItem(member); // TODO
     }
 }

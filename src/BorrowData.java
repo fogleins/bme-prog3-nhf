@@ -55,4 +55,8 @@ public class BorrowData extends DefaultTreeModel {
         else // ha root, akkor hamis, ha nem az (tehát könyv), akkor igaz
             return node != root;
     }
+
+    public void reload() {
+        super.reload();
+    }
 }
