@@ -309,16 +309,17 @@ public class ApplicationFrame extends JFrame {
         JCheckBox searchAuthorToo = new JCheckBox("Keresés a szerzők nevében is");
         searchAuthorToo.addActionListener(e -> {
             String searchBarText = searchBar.getText();
-            if (!searchBarText.equals("Keresés " + library.books.size() + " könyv között"))
+            if (!searchBarText.equals(searchBar.getCurrentPlaceholderText()))
                 bookTable.setRowSorter(library.search(searchBarText, searchAuthorToo.isSelected()));
         });
         // szűrés a kölcsönzött könyvekre
         JCheckBox showBorrowedBooksOnly = new JCheckBox("Csak a kölcsönzött könyvek mutatása");
         showBorrowedBooksOnly.addActionListener(actionEvent -> {
-            if (showBorrowedBooksOnly.isSelected())
+            if (showBorrowedBooksOnly.isSelected()) {
+                if (!searchBar.getText().equals(searchBar.getCurrentPlaceholderText()))
+                    searchBar.update();
                 bookTable.setRowSorter(library.showBorrowedOnly());
-            else if (!searchBar.getText().equals(searchBar.getCurrentPlaceholderText()))
-                bookTable.setRowSorter(library.search(searchBar.getText(), searchAuthorToo.isSelected()));
+            }
             else bookTable.setAutoCreateRowSorter(true);
         });
         booksNorthPanel.add(showBorrowedBooksOnly);
@@ -337,7 +338,7 @@ public class ApplicationFrame extends JFrame {
             @Override
             public void removeUpdate(DocumentEvent e) {
                 // keresés az összes könyv között
-                if (showBorrowedBooksOnly.isSelected())
+                if (showBorrowedBooksOnly.isSelected() && !searchBar.getText().equals(""))
                     showBorrowedBooksOnly.doClick();
                 bookTable.setRowSorter(library.search(searchBar.getText(), searchAuthorToo.isSelected()));
             }
