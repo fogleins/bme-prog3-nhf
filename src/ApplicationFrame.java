@@ -389,30 +389,18 @@ public class ApplicationFrame extends JFrame {
                         if (!library.editMember(member, memberPanel.getNameValue(), memberPanel.getDateOfBirthValue(), memberPanel.getPhoneValue()))
                             JOptionPane.showMessageDialog(null, "Hibás adat került megadásra. Ellenőrizze, " +
                                     "hogy helyesen adta-e meg a formátumokat.", "Hibás adat", JOptionPane.WARNING_MESSAGE);
-
-//                    refreshComponents(); // TODO
                 }
             }
         });
 
-        // TODO: member modellnek add() függvénye fire...() legyen
-//        this.memberTable.addPropertyChangeListener(new PropertyChangeListener() {
-//            @Override
-//            public void propertyChange(PropertyChangeEvent evt) {
-//                library.memberData.fireTableDataChanged();
-//                library.bookData.fireTableDataChanged();
-//                reloadTree();
-//            }
-//        });
-//
-//        memberTable.getModel().addTableModelListener(new TableModelListener() {
-//            @Override
-//            public void tableChanged(TableModelEvent e) {
-//                library.memberData.fireTableDataChanged();
-//                library.bookData.fireTableDataChanged();
-//                reloadTree();
-//            }
-//        });
+        // ha megváltozik a tagok valamilyen adata, a tagok adatait használó komponenseket frissítjük
+        memberTable.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                library.bookData.fireTableDataChanged();
+                reloadTree();
+            }
+        });
 
         // panel
         JPanel membersPanel = new JPanel(new BorderLayout());
@@ -431,8 +419,6 @@ public class ApplicationFrame extends JFrame {
                     JOptionPane.showMessageDialog(null, "Hibás adat került megadásra. Ellenőrizze, " +
                             "hogy helyesen adta-e meg a formátumokat.", "Hibás adat", JOptionPane.WARNING_MESSAGE);
             }
-//            refreshMemberTable(); // TODO
-//            reloadTree();
         });
         membersComponentPanel.add(addMember);
         JButton removeMember = new JButton("Tag eltávolítása");
@@ -442,13 +428,8 @@ public class ApplicationFrame extends JFrame {
                         "tagot? Ha van kölcsönzött könyve, az törlődik.", "Biztosan törli?", JOptionPane.YES_NO_OPTION);
                 if (chosenOption == JOptionPane.YES_OPTION)
                     library.remove(library.members.get(memberTable.convertRowIndexToModel(memberTable.getSelectedRow())));
-
-                refreshComponents(); // TODO
             }
         });
-        // ha egy tag adatait szerkesztik, frissítjük a releváns komponenseket
-        // FIXME
-//        this.memberTable.addPropertyChangeListener(propertyChangeEvent -> refreshComponents()); // TODO
         membersComponentPanel.add(removeMember);
         membersPanel.add(membersComponentPanel, BorderLayout.NORTH);
 

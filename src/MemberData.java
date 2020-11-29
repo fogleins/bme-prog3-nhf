@@ -101,36 +101,32 @@ public class MemberData extends AbstractTableModel {
         return false;
     }
 
-//    private boolean listContains(Member member) {
-//        for (Member m: members) {
-//            if (m.getName().equals(member.getName()) && m.getDateOfBirth().isEqual(member.getDateOfBirth()) && m.getPhone().equals(member.getPhone()))
-//                return true;
-//        }
-//        return false;
-//    }
-//
-//    public void addMember(Member member) throws PersonAlreadyAddedException {
-//        if (listContains(member))
-//            throw new PersonAlreadyAddedException(member.toString().substring(0, member.toString().indexOf(':')) + " már szerepel a programban, így nem lesz hozzáadva.");
-//        members.add(member);
-//        this.membersComboBox.addItem(member);
-//        fireTableDataChanged();
-//    }
-//
-//    public void addMember(String name, LocalDate dateOfBirth, String phone) throws PersonAlreadyAddedException {
-//        addMember(new Member(name, dateOfBirth, phone));
-//    }
-//
-//    public void removeMember(Member member) {
-//        this.members.remove(member);
-//        fireTableDataChanged();
-//    }
+    /**
+     * Hozzáad egy tagot a táblázathoz.
+     *
+     * @param member A hozzáadandó tag
+     */
+    public void add(Member member) {
+        members.add(member);
+        this.membersComboBox.addItem(member);
+        fireTableDataChanged();
+    }
+
+    /**
+     * Eltávolít egy tagot.
+     *
+     * @param member Az eltávolítandó tag
+     */
+    public void remove(Member member) {
+        this.membersComboBox.removeItem(member);
+        this.members.remove(member);
+        fireTableDataChanged();
+    }
 
     /**
      * Feltölti a ComboBox-ot a tagok adataival.
      */
     private void initComboBox() {
-        this.membersComboBox = new JComboBox<>();
         for (Member member : this.members)
             this.membersComboBox.addItem(member);
     }

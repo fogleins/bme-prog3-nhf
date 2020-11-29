@@ -22,6 +22,7 @@ public class BookData extends AbstractTableModel {
 
     /**
      * Konstruktor
+     *
      * @param books A megjelenítendő könyvek listája
      */
     public BookData(List<Book> books) {
@@ -96,14 +97,21 @@ public class BookData extends AbstractTableModel {
         }
     }
 
-    // TODO: javadoc vagy áthelyezés?
-    public void addBook(Book book)/* throws MissingRequiredArgumentException */{
-//        if (book.getAuthor() == null || book.getYearOfPublication() == 0 || book.getTitle().equals("") || book.getLanguage().equals(""))
-//            throw new MissingRequiredArgumentException();
+    /**
+     * Felvesz egy könyvet a programba.
+     *
+     * @param book A felveendő könyv
+     */
+    public void addBook(Book book) {
         books.add(book);
         fireTableDataChanged();
     }
 
+    /**
+     * Eltávolít egy könyvet a programból.
+     *
+     * @param book Az eltávolítandó könyv
+     */
     public void removeBook(Book book) {
         books.remove(book);
         fireTableDataChanged();

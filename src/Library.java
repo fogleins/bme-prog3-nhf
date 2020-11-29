@@ -263,8 +263,8 @@ public class Library implements Serializable {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate dateOfBirth = LocalDate.parse(dob, dateFormatter);
             Member member = new Member(name, dateOfBirth, phone);
-            this.memberData.membersComboBox.addItem(member); // TODO: MemberData-ba?
-            return this.members.add(member);
+            this.memberData.add(member);
+            return true;
         }
         return false;
     }
@@ -284,6 +284,7 @@ public class Library implements Serializable {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             member.setDateOfBirth(LocalDate.parse(dob, dateFormatter));
             member.setPhone(phone);
+            this.memberData.fireTableDataChanged();
             return true;
         }
         return false;
@@ -300,7 +301,6 @@ public class Library implements Serializable {
         List<Book> books = member.getBorrowedBooks();
         for (Book book : books)
             book.setBorrowedBy(null);
-        this.members.remove(member);
-        this.memberData.membersComboBox.removeItem(member); // TODO
+        this.memberData.remove(member);
     }
 }
