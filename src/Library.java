@@ -14,28 +14,28 @@ public class Library implements Serializable {
     /**
      * A tárolt könyvek listája.
      */
-    List<Book> books;
+    private final List<Book> books;
 
     /**
      * A tárolt tagok listája.
      */
-    List<Member> members;
+    private final List<Member> members;
 
 
     /**
      * A könyvek adatait tároló táblázat modellje.
      */
-    transient BookData bookData;
+    private transient BookData bookData;
 
     /**
      * A tagok adatait tartalmazó táblázat modellje.
      */
-    transient MemberData memberData;
+    private transient MemberData memberData;
 
     /**
      * A szerializált adatok mentési helye.
      */
-    transient String serializationPath;
+    private transient String serializationPath;
 
     /**
      * Konstruktor
@@ -43,6 +43,30 @@ public class Library implements Serializable {
     public Library() {
         this.books = new ArrayList<>();
         this.members = new ArrayList<>();
+    }
+
+    public List<Book> getBooks() {
+        return books;
+    }
+
+    public List<Member> getMembers() {
+        return members;
+    }
+
+    public BookData getBookData() {
+        return bookData;
+    }
+
+    public MemberData getMemberData() {
+        return memberData;
+    }
+
+    public String getSerializationPath() {
+        return serializationPath;
+    }
+
+    public void setSerializationPath(String serializationPath) {
+        this.serializationPath = serializationPath;
     }
 
     /**
@@ -66,8 +90,7 @@ public class Library implements Serializable {
             ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(serializationPath));
             outputStream.writeObject(this);
             outputStream.close();
-        } catch (Exception ex) { // TODO
-            ex.printStackTrace();
+        } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "Hiba az adatok mentése során: A könyvek mentése sikertelen ("
                     + ex.getMessage() + ')', "Hiba az adatok mentése során", JOptionPane.ERROR_MESSAGE);
         }
@@ -119,6 +142,8 @@ public class Library implements Serializable {
             String path = library.serializationPath;
             ObjectInputStream libraryInputStream = new ObjectInputStream(new FileInputStream(path));
             library = (Library) libraryInputStream.readObject();
+//            library.bookData = ((Library) libraryInputStream.readObject()).bookData;
+//            library.memberData = ((Library) libraryInputStream.readObject()).memberData;
             libraryInputStream.close();
             library.initTransientVariables(path);
         } catch (FileNotFoundException notFoundException) {

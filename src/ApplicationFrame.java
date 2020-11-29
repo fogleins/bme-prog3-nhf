@@ -84,10 +84,10 @@ public class ApplicationFrame extends JFrame {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             Component component = renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            boolean borrowable = library.books.get(bookTable.convertRowIndexToModel(row)).isBorrowable();
+            boolean borrowable = library.getBooks().get(bookTable.convertRowIndexToModel(row)).isBorrowable();
 
             if (borrowable)
-                if ((library.books.get(bookTable.convertRowIndexToModel(row)).getBorrowedBy()) != null)
+                if ((library.getBooks().get(bookTable.convertRowIndexToModel(row)).getBorrowedBy()) != null)
                     component.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
                 else
                     component.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 12));
@@ -102,8 +102,8 @@ public class ApplicationFrame extends JFrame {
      */
     private void readDataFromFile() {
         this.library = Library.readDataFromFile(this.library);
-        this.bookTable.setModel(this.library.bookData);
-        this.memberTable.setModel(this.library.memberData);
+        this.bookTable.setModel(this.library.getBookData());
+        this.memberTable.setModel(this.library.getMemberData());
         initCellEditors();
     }
 
@@ -117,8 +117,9 @@ public class ApplicationFrame extends JFrame {
         chooser.setDialogTitle("Megnyitás");
         int returnVal = chooser.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            this.library.serializationPath = chooser.getSelectedFile().getPath();
+            this.library.setSerializationPath(chooser.getSelectedFile().getPath());
             readDataFromFile();
+            this.borrowersTree.setModel(new BorrowData(this.library.getMembers())); // TODO + üres member táblázat -> első member hozzáadásakor is frissítsen
         }
     }
 
@@ -156,7 +157,7 @@ public class ApplicationFrame extends JFrame {
      */
     private void showRemoveBookDialog() {
         if (bookTable.getSelectedRow() >= 0) {
-            Book book = library.books.get(bookTable.convertRowIndexToModel(bookTable.getSelectedRow()));
+            Book book = library.getBooks().get(bookTable.convertRowIndexToModel(bookTable.getSelectedRow()));
             int chosenOption = JOptionPane.showConfirmDialog(null,
                     (book.getBorrowedBy() == null) ? "Biztosan törli a kiválasztott könyvet?" : "A kiválasztott könyvet kikölcsönözték. Biztosan törli?",
                     "Biztosan törli?", JOptionPane.YES_NO_OPTION);
@@ -278,12 +279,9 @@ public class ApplicationFrame extends JFrame {
         // ha változik a könyvek valamilyen adata, az aktuális kölcsönzések fáját is frissítjük
         this.bookTable.addPropertyChangeListener(propertyChangeEvent -> reloadTree());
         JScrollPane bookScrollPane = new JScrollPane(this.bookTable);
-        bookTable.getModel().addTableModelListener(new TableModelListener() {
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                searchBar.update();
-                reloadTree();
-            }
+        bookTable.getModel().addTableModelListener(e -> {
+            searchBar.update();
+            reloadTree();
         });
 
         // Panelek
@@ -319,13 +317,12 @@ public class ApplicationFrame extends JFrame {
                 if (!searchBar.getText().equals(searchBar.getCurrentPlaceholderText()))
                     searchBar.update();
                 bookTable.setRowSorter(library.showBorrowedOnly());
-            }
-            else bookTable.setAutoCreateRowSorter(true);
+            } else bookTable.setAutoCreateRowSorter(true);
         });
         booksNorthPanel.add(showBorrowedBooksOnly);
 
         // keresés mező
-        this.searchBar = new BookSearchBar(library.books);
+        this.searchBar = new BookSearchBar(library.getBooks());
         searchBar.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -379,7 +376,7 @@ public class ApplicationFrame extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    Member member = library.members.get(memberTable.convertRowIndexToModel(memberTable.getSelectedRow()));
+                    Member member = library.getMembers().get(memberTable.convertRowIndexToModel(memberTable.getSelectedRow()));
                     MemberPanel memberPanel = new MemberPanel();
                     memberPanel.setNameValue(member.getName());
                     memberPanel.setDateOfBirth(member.getDateOfBirth().toString());
@@ -395,12 +392,10 @@ public class ApplicationFrame extends JFrame {
         });
 
         // ha megváltozik a tagok valamilyen adata, a tagok adatait használó komponenseket frissítjük
-        memberTable.getModel().addTableModelListener(new TableModelListener() {
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                library.bookData.fireTableDataChanged();
-                reloadTree();
-            }
+        memberTable.getModel().addTableModelListener(e -> {
+            System.out.println("futott");
+            library.getBookData().fireTableDataChanged();
+            reloadTree();
         });
 
         // panel
@@ -428,7 +423,7 @@ public class ApplicationFrame extends JFrame {
                 int chosenOption = JOptionPane.showConfirmDialog(null, "Biztosan törli a kiválasztott " +
                         "tagot? Ha van kölcsönzött könyve, az törlődik.", "Biztosan törli?", JOptionPane.YES_NO_OPTION);
                 if (chosenOption == JOptionPane.YES_OPTION)
-                    library.remove(library.members.get(memberTable.convertRowIndexToModel(memberTable.getSelectedRow())));
+                    library.remove(library.getMembers().get(memberTable.convertRowIndexToModel(memberTable.getSelectedRow())));
             }
         });
         membersComponentPanel.add(removeMember);
@@ -442,8 +437,7 @@ public class ApplicationFrame extends JFrame {
      * Inicializálja a kölcsönzéseket nyilvántartó {@code JTree} objektumot.
      */
     private void initTree() {
-        DefaultMutableTreeNode treeRoot = new DefaultMutableTreeNode(this.library.members);
-        BorrowData borrowData = new BorrowData(treeRoot, this.library.members);
+        BorrowData borrowData = new BorrowData(this.library.getMembers());
         this.borrowersTree = new JTree(borrowData);
         this.borrowersTree.setRootVisible(false);
         this.borrowersTree.setShowsRootHandles(true);
@@ -470,39 +464,14 @@ public class ApplicationFrame extends JFrame {
      * Frissíti a kölcsönzéseket nyilvántartó fa struktúrát.
      */
     private void reloadTree() {
-        if (ApplicationFrame.this.borrowersTree != null) {
-            // TODO
-//            DefaultTreeModel treeModel = (DefaultTreeModel) ApplicationFrame.this.borrowersTree.getModel();
-//            treeModel.reload();
-            ((BorrowData) borrowersTree.getModel()).reload();
+        if (this.borrowersTree != null) {
+            DefaultTreeModel treeModel = (DefaultTreeModel) this.borrowersTree.getModel();
+            treeModel.reload();
             // mindig teljesen kinyitva jelenítjük meg
             for (int i = 0; i < ApplicationFrame.this.borrowersTree.getRowCount(); i++) {
                 borrowersTree.expandRow(i);
             }
         }
-    }
-
-    /**
-     * Frissíti a könyvek adatait tartalmazó táblázatot.
-     */
-    private void refreshBookTable() {
-        this.library.bookData.fireTableDataChanged();
-    }
-
-    /**
-     * Frissíti a tagok adatait tartalmazó táblázatot.
-     */
-    private void refreshMemberTable() {
-        this.library.memberData.fireTableDataChanged();
-    }
-
-    /**
-     * Frissíti az aktuális kölcsönzéseket megjelenítő fa nézetet és a tagokat, valamint a könyveket megjelenítő táblázatokat
-     */
-    private void refreshComponents() {
-        refreshMemberTable();
-        refreshBookTable();
-        reloadTree();
     }
 
     /**
@@ -512,7 +481,7 @@ public class ApplicationFrame extends JFrame {
         // book table
         // kölcsönző JComboBox-szal való megadásához
         TableColumn memberColumn = bookTable.getColumnModel().getColumn(6);
-        JComboBox<Member> memberComboBox = this.library.memberData.getMembersComboBox();
+        JComboBox<Member> memberComboBox = this.library.getMemberData().getMembersComboBox();
         memberComboBox.insertItemAt(null, 0); // ha korábban ki volt kölcsönözve, akkor a null-t választva lehet "visszavinni" TODO: gombbal is lehessen
         memberColumn.setCellEditor(new DefaultCellEditor(memberComboBox));
 
@@ -530,7 +499,7 @@ public class ApplicationFrame extends JFrame {
     public ApplicationFrame() {
         super("Könyvtárkezelő");
         this.library = new Library();
-        this.library.serializationPath = "library.libdat";
+        this.library.setSerializationPath("library.libdat");
 
         this.horizontalSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         this.horizontalSplitPane.setOneTouchExpandable(true);

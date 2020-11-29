@@ -9,16 +9,15 @@ public class BorrowData extends DefaultTreeModel {
     /**
      * A könyvtári tagok listája.
      */
-    private List<Member> members;
+    private final List<Member> members;
 
     /**
      * Konstruktor
      *
-     * @param root    A fa gyökere
      * @param members A könyvtári tagok listája
      */
-    public BorrowData(DefaultMutableTreeNode root, List<Member> members) {
-        super(root);
+    public BorrowData(List<Member> members) {
+        super(new DefaultMutableTreeNode(members));
         this.members = members;
     }
 
@@ -31,21 +30,21 @@ public class BorrowData extends DefaultTreeModel {
     public Object getChild(Object parent, int index) {
         if (parent == root)
             return this.members.get(index);
-        else if (members.contains(parent)) {
+        else /*if (members.contains(parent))*/ { // TODO
             Member member = ((Member) parent);
             Book book = member.getBorrowedBooks().get(index);
             return book.getAuthor() + ": " + book.getTitle();
         }
-        return null;
+//        return null; // TODO
     }
 
     @Override
     public int getChildCount(Object parent) {
         if (parent == root)
             return this.members.size();
-        else if (members.contains(parent))
-            return ((Member) parent).getBorrowedBooks().size();
-        return 0;
+//        else if (members.contains(parent)) // TODO
+        return ((Member) parent).getBorrowedBooks().size();
+//        return 0; // todo
     }
 
     @Override
@@ -54,9 +53,5 @@ public class BorrowData extends DefaultTreeModel {
             return ((Member) node).getBorrowedBooks().size() == 0;
         else // ha root, akkor hamis, ha nem az (tehát könyv), akkor igaz
             return node != root;
-    }
-
-    public void reload() {
-        super.reload();
     }
 }
