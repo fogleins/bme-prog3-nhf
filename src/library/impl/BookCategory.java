@@ -1,3 +1,5 @@
+package library.impl;
+
 /**
  * Egy könyv lehetséges kategóriái.
  */

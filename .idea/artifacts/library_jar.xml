@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/library_jar</output-path>
     <root id="archive" name="library.jar">
       <element id="module-output" name="library" />
+      <element id="file-copy" path="$PROJECT_DIR$/library.libdat" />
     </root>
   </artifact>
 </component>

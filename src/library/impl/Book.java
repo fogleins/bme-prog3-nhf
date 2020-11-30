@@ -1,3 +1,5 @@
+package library.impl;
+
 import java.io.Serializable;
 
 /**

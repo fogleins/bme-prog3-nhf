@@ -1,3 +1,5 @@
+package library.impl;
+
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -474,7 +476,7 @@ public class ApplicationFrame extends JFrame {
             DefaultTreeModel treeModel = (DefaultTreeModel) this.borrowersTree.getModel();
             treeModel.reload();
             // mindig teljesen kinyitva jelenítjük meg
-            for (int i = 0; i < ApplicationFrame.this.borrowersTree.getRowCount(); i++) {
+            for (int i = 0; i < this.borrowersTree.getRowCount(); i++) {
                 borrowersTree.expandRow(i);
             }
         }

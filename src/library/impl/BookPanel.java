@@ -1,3 +1,5 @@
+package library.impl;
+
 import javax.swing.*;
 import java.awt.*;
 
