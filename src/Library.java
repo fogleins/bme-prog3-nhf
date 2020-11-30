@@ -142,8 +142,6 @@ public class Library implements Serializable {
             String path = library.serializationPath;
             ObjectInputStream libraryInputStream = new ObjectInputStream(new FileInputStream(path));
             library = (Library) libraryInputStream.readObject();
-//            library.bookData = ((Library) libraryInputStream.readObject()).bookData;
-//            library.memberData = ((Library) libraryInputStream.readObject()).memberData;
             libraryInputStream.close();
             library.initTransientVariables(path);
         } catch (FileNotFoundException notFoundException) {

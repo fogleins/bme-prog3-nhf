@@ -15,11 +15,6 @@ import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 public class ApplicationFrame extends JFrame {
 
     /**
-     * A könytár objektum, aminek az adatait megjeleníti a program.
-     */
-    private Library library;
-
-    /**
      * A könyveket tartalmazó {@code JTable} objektum.
      */
     private final JTable bookTable;
@@ -45,6 +40,11 @@ public class ApplicationFrame extends JFrame {
     private final JSplitPane verticalSplitPane;
 
     /**
+     * A könyvtár objektum, aminek az adatait megjeleníti a program.
+     */
+    private Library library;
+
+    /**
      * A könyvek közti kereséshez használt szövegmező.
      */
     private BookSearchBar searchBar;
@@ -63,38 +63,46 @@ public class ApplicationFrame extends JFrame {
     private Dimension windowSize;
 
     /**
-     * Renderer a könyveket tartalmazó táblázathoz; a tárolt könyvek elérhetősége alapján más-más betűstílussal jeleníti meg a sorokat.
+     * Konstruktor
      */
-    private class BookTableCellRenderer implements TableCellRenderer {
+    public ApplicationFrame() {
+        super("Könyvtárkezelő");
+        this.library = new Library();
+        this.library.setSerializationPath("library.libdat");
 
-        /**
-         * A táblázat renderere.
-         */
-        private final TableCellRenderer renderer;
+        this.horizontalSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        this.horizontalSplitPane.setOneTouchExpandable(true);
+        this.horizontalSplitPane.setContinuousLayout(true);
+        this.verticalSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        this.verticalSplitPane.add(this.horizontalSplitPane);
+        this.verticalSplitPane.setOneTouchExpandable(true); // a két rész külön-külön megjeleníthető
+        this.verticalSplitPane.setContinuousLayout(true);
+        this.bookTable = new JTable();
+        this.memberTable = new JTable();
+        readDataFromFile();
+        initFrame();
+        initMenuBar();
+        initBookTable();
+        this.northPanel = new JPanel();
+        this.northPanel.setLayout(new BoxLayout(this.northPanel, BoxLayout.X_AXIS));
+        this.northPanel.setPreferredSize(new Dimension(1280, 250));
+        this.northPanel.add(this.horizontalSplitPane);
+        this.verticalSplitPane.add(this.northPanel);
+        this.add(this.verticalSplitPane, BorderLayout.CENTER);
+        initMemberTable();
+        initTree();
+        this.pack();
+    }
 
-        /**
-         * Konstruktor. Beállítja a táblázat rendererét.
-         *
-         * @param renderer A táblázat renderere
-         */
-        public BookTableCellRenderer(TableCellRenderer renderer) {
-            this.renderer = renderer;
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            Component component = renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            boolean borrowable = library.getBooks().get(bookTable.convertRowIndexToModel(row)).isBorrowable();
-
-            if (borrowable)
-                if ((library.getBooks().get(bookTable.convertRowIndexToModel(row)).getBorrowedBy()) != null)
-                    component.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-                else
-                    component.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 12));
-            else
-                component.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
-            return component;
-        }
+    public static void main(String[] args) {
+//        try {
+//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//        }
+//        catch (Exception e) {
+//            System.out.println("err");
+//        }
+        ApplicationFrame frame = new ApplicationFrame();
+        frame.setVisible(true);
     }
 
     /**
@@ -103,7 +111,9 @@ public class ApplicationFrame extends JFrame {
     private void readDataFromFile() {
         this.library = Library.readDataFromFile(this.library);
         this.bookTable.setModel(this.library.getBookData());
+        this.bookTable.getModel().addTableModelListener(new BookTableTableModelListener());
         this.memberTable.setModel(this.library.getMemberData());
+        this.memberTable.getModel().addTableModelListener(new MemberTableModelListener());
         initCellEditors();
     }
 
@@ -119,7 +129,8 @@ public class ApplicationFrame extends JFrame {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             this.library.setSerializationPath(chooser.getSelectedFile().getPath());
             readDataFromFile();
-            this.borrowersTree.setModel(new BorrowData(this.library.getMembers())); // TODO + üres member táblázat -> első member hozzáadásakor is frissítsen
+            this.borrowersTree.setModel(new BorrowData(this.library.getMembers()));
+            this.searchBar.setBooks(this.library.getBooks());
         }
     }
 
@@ -279,10 +290,6 @@ public class ApplicationFrame extends JFrame {
         // ha változik a könyvek valamilyen adata, az aktuális kölcsönzések fáját is frissítjük
         this.bookTable.addPropertyChangeListener(propertyChangeEvent -> reloadTree());
         JScrollPane bookScrollPane = new JScrollPane(this.bookTable);
-        bookTable.getModel().addTableModelListener(e -> {
-            searchBar.update();
-            reloadTree();
-        });
 
         // Panelek
         JPanel booksPanel = new JPanel();
@@ -391,13 +398,6 @@ public class ApplicationFrame extends JFrame {
             }
         });
 
-        // ha megváltozik a tagok valamilyen adata, a tagok adatait használó komponenseket frissítjük
-        memberTable.getModel().addTableModelListener(e -> {
-            System.out.println("futott");
-            library.getBookData().fireTableDataChanged();
-            reloadTree();
-        });
-
         // panel
         JPanel membersPanel = new JPanel(new BorderLayout());
         membersPanel.setBorder(BorderFactory.createTitledBorder("Könyvtári tagok"));
@@ -494,45 +494,63 @@ public class ApplicationFrame extends JFrame {
     }
 
     /**
-     * Konstruktor
+     * Renderer a könyveket tartalmazó táblázathoz; a tárolt könyvek elérhetősége alapján más-más betűstílussal jeleníti meg a sorokat.
      */
-    public ApplicationFrame() {
-        super("Könyvtárkezelő");
-        this.library = new Library();
-        this.library.setSerializationPath("library.libdat");
+    private class BookTableCellRenderer implements TableCellRenderer {
 
-        this.horizontalSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        this.horizontalSplitPane.setOneTouchExpandable(true);
-        this.horizontalSplitPane.setContinuousLayout(true);
-        this.verticalSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        this.verticalSplitPane.add(this.horizontalSplitPane);
-        this.verticalSplitPane.setOneTouchExpandable(true); // a két rész külön-külön megjeleníthető
-        this.verticalSplitPane.setContinuousLayout(true);
-        this.bookTable = new JTable();
-        this.memberTable = new JTable();
-        readDataFromFile();
-        initFrame();
-        initMenuBar();
-        initBookTable();
-        this.northPanel = new JPanel();
-        this.northPanel.setLayout(new BoxLayout(this.northPanel, BoxLayout.X_AXIS));
-        this.northPanel.setPreferredSize(new Dimension(1280, 250));
-        this.northPanel.add(this.horizontalSplitPane);
-        this.verticalSplitPane.add(this.northPanel);
-        this.add(this.verticalSplitPane, BorderLayout.CENTER);
-        initMemberTable();
-        initTree();
-        this.pack();
+        /**
+         * A táblázat renderere.
+         */
+        private final TableCellRenderer renderer;
+
+        /**
+         * Konstruktor. Beállítja a táblázat rendererét.
+         *
+         * @param renderer A táblázat renderere
+         */
+        public BookTableCellRenderer(TableCellRenderer renderer) {
+            this.renderer = renderer;
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            Component component = renderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            boolean borrowable = library.getBooks().get(bookTable.convertRowIndexToModel(row)).isBorrowable();
+
+            if (borrowable)
+                if ((library.getBooks().get(bookTable.convertRowIndexToModel(row)).getBorrowedBy()) != null)
+                    component.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
+                else
+                    component.setFont(new Font(Font.SANS_SERIF, Font.ITALIC, 12));
+            else
+                component.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+            return component;
+        }
     }
 
-    public static void main(String[] args) {
-//        try {
-//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//        }
-//        catch (Exception e) {
-//            System.out.println("err");
-//        }
-        ApplicationFrame frame = new ApplicationFrame();
-        frame.setVisible(true);
+    /**
+     * A könyvek táblázatának modelljén történő változásokat figyelő listener. Ha a modell változik, frissíti a tőle
+     * függő egyéb komponenseket.
+     */
+    private class BookTableTableModelListener implements TableModelListener {
+
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            searchBar.update();
+            reloadTree();
+        }
+    }
+
+    /**
+     * A könyvek táblázatának modelljén történő változásokat figyelő listener. Ha a modell változik, frissítjük a tőle
+     * függő egyéb komponenseket.
+     */
+    private class MemberTableModelListener implements TableModelListener {
+
+        @Override
+        public void tableChanged(TableModelEvent e) {
+            library.getBookData().fireTableDataChanged();
+            reloadTree();
+        }
     }
 }
