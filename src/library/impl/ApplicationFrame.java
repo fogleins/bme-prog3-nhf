@@ -337,6 +337,14 @@ public class ApplicationFrame extends JFrame {
         booksNorthPanel.add(removeBookButton);
         booksNorthPanel.add(Box.createHorizontalGlue());
 
+        JButton returnBookButton = new JButton("Könyv visszavétele");
+        returnBookButton.addActionListener(actionEvent -> {
+            if (bookTable.getSelectedRow() >= 0)
+                this.library.getBookData().setValueAt(null, bookTable.convertRowIndexToModel(bookTable.getSelectedRow()), 6);
+        });
+        booksNorthPanel.add(returnBookButton);
+        booksNorthPanel.add(Box.createHorizontalGlue());
+
         // keresés komponensei
         JCheckBox searchAuthorToo = new JCheckBox("Keresés a szerzők nevében is");
         searchAuthorToo.addActionListener(e -> {
