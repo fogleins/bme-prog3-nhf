@@ -88,8 +88,6 @@ public class BookData extends AbstractTableModel {
         switch (columnIndex) {
             case 2:
                 return Integer.class;
-            case 3:
-                return BookCategory.class;
             case 5:
                 return Boolean.class;
             default:

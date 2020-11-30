@@ -178,6 +178,23 @@ public class ApplicationFrame extends JFrame {
     }
 
     /**
+     * Megjelenít egy tag adatinak szerkesztését lehetővé tevő ablakot, a kapott adatokat továbbítja a {@code Library} osztálynak.
+     */
+    private void showEditMemberDialog() {
+        Member member = library.getMembers().get(memberTable.convertRowIndexToModel(memberTable.getSelectedRow()));
+        MemberPanel memberPanel = new MemberPanel();
+        memberPanel.setNameValue(member.getName());
+        memberPanel.setDateOfBirth(member.getDateOfBirth().toString());
+        memberPanel.setPhone(member.getPhone());
+        int chosenOption = JOptionPane.showConfirmDialog(null, memberPanel.getMainPanel(),
+                "Tag adatainak szerkesztése", JOptionPane.OK_CANCEL_OPTION);
+        if (chosenOption == JOptionPane.OK_OPTION)
+            if (!library.editMember(member, memberPanel.getNameValue(), memberPanel.getDateOfBirthValue(), memberPanel.getPhoneValue()))
+                JOptionPane.showMessageDialog(null, "Hibás adat került megadásra. Ellenőrizze, " +
+                        "hogy helyesen adta-e meg a formátumokat.", "Hibás adat", JOptionPane.WARNING_MESSAGE);
+    }
+
+    /**
      * Beállítja az ablak tulajdonságait
      */
     private void initFrame() {
@@ -254,6 +271,12 @@ public class ApplicationFrame extends JFrame {
         });
 
         JMenu editMenu = new JMenu("Szerkesztés");
+        JMenuItem editMember = new JMenuItem("Tag szerkesztése...");
+        editMember.setAccelerator(KeyStroke.getKeyStroke('E', CTRL_DOWN_MASK));
+        editMember.addActionListener(actionEvent -> {
+            if (memberTable.getSelectedRow() >= 0)
+                showEditMemberDialog();
+        });
 
         JMenu libraryMenu = new JMenu("Könyvtár");
         JMenuItem addNew = new JMenuItem("Új könyv hozzáadása");
@@ -269,6 +292,8 @@ public class ApplicationFrame extends JFrame {
         fileMenu.addSeparator();
         fileMenu.add(exitWithoutSaving);
         fileMenu.add(exit);
+
+        editMenu.add(editMember);
 
         libraryMenu.add(addNew);
         libraryMenu.add(remove);
@@ -382,19 +407,8 @@ public class ApplicationFrame extends JFrame {
         this.memberTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (e.getClickCount() == 2) {
-                    Member member = library.getMembers().get(memberTable.convertRowIndexToModel(memberTable.getSelectedRow()));
-                    MemberPanel memberPanel = new MemberPanel();
-                    memberPanel.setNameValue(member.getName());
-                    memberPanel.setDateOfBirth(member.getDateOfBirth().toString());
-                    memberPanel.setPhone(member.getPhone());
-                    int chosenOption = JOptionPane.showConfirmDialog(null, memberPanel.getMainPanel(),
-                            "Tag adatainak szerkesztése", JOptionPane.OK_CANCEL_OPTION);
-                    if (chosenOption == JOptionPane.OK_OPTION)
-                        if (!library.editMember(member, memberPanel.getNameValue(), memberPanel.getDateOfBirthValue(), memberPanel.getPhoneValue()))
-                            JOptionPane.showMessageDialog(null, "Hibás adat került megadásra. Ellenőrizze, " +
-                                    "hogy helyesen adta-e meg a formátumokat.", "Hibás adat", JOptionPane.WARNING_MESSAGE);
-                }
+                if (e.getClickCount() == 2)
+                    showEditMemberDialog();
             }
         });
 
@@ -441,14 +455,6 @@ public class ApplicationFrame extends JFrame {
         this.borrowersTree = new JTree(borrowData);
         this.borrowersTree.setRootVisible(false);
         this.borrowersTree.setShowsRootHandles(true);
-
-        // Fa elemeinek az ikonjainak beállítása
-        // TODO: ikonok lecserélése?
-//        DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer();
-//        renderer.setOpenIcon(null);
-//        renderer.setClosedIcon(null);
-//        renderer.setLeafIcon(null);
-//        borrowersTree.setCellRenderer(renderer);
 
         JScrollPane borrowersScrollPane = new JScrollPane(borrowersTree);
         this.northPanel.add(borrowersScrollPane);
