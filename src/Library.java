@@ -3,7 +3,6 @@ import javax.swing.table.TableRowSorter;
 import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.List;
 
@@ -202,26 +201,6 @@ public class Library implements Serializable {
     }
 
     /**
-     * Ellenőrzi, hogy a paraméterül kapott adatok lehetnek-e egy könyv adatai.
-     *
-     * @param author   A könyv szerzője
-     * @param title    A könyv címe
-     * @param year     A könyv kiadási éve
-     * @param language A könyv nyelve
-     * @return Hamis, ha legalább egy paraméter nem felel meg az elvárt formátumnak, egyébként igaz
-     */
-    private static boolean isValidBookInput(String author, String title, String year, String language) {
-        if (author.equals("") || title.equals("") || language.equals(""))
-            return false;
-        try {
-            Integer.parseInt(year);
-        } catch (NumberFormatException numberFormatException) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * A könyvtárhoz ad egy könyvet, ha a megadott adatai helyesek.
      *
      * @param author       A könyv szerzője
@@ -233,7 +212,7 @@ public class Library implements Serializable {
      * @return Igaz, ha a könyv adatai érvényesek voltak és a hozzáadás sikerült, egyébként hamis
      */
     public boolean addBook(String author, String title, String year, BookCategory category, String language, boolean isBorrowable) {
-        if (isValidBookInput(author, title, year, language)) {
+        if (ValidityChecker.isValidBookInput(author, title, year, language)) {
             Book book = new Book(author, title, Integer.parseInt(year), category, language, isBorrowable);
             this.bookData.addBook(book);
             return true;
@@ -255,26 +234,6 @@ public class Library implements Serializable {
     }
 
     /**
-     * Megvizsgálja, hogy a paraméterül kapott adatok érvényesek-e, lehetnek-e egy {@code Member} adatai.
-     *
-     * @param name  A felhasználó által megadott név
-     * @param dob   A felhasználó által megadott születési idő
-     * @param phone A felhasználó által megadott telefonszám
-     * @return Hamis, ha valamelyik paraméter nem felel meg az elvárt formátumnak, egyébként igaz
-     */
-    private static boolean isValidMemberInput(String name, String dob, String phone) {
-        if (name.equals("") || !(phone.matches("\\d+") || phone.equals("")))
-            return false;
-        try {
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate.parse(dob, dateFormatter);
-        } catch (DateTimeParseException parseException) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Hozzáad egy tagot a programhoz.
      *
      * @param name  A tag neve
@@ -282,7 +241,7 @@ public class Library implements Serializable {
      * @param phone A tag telefonszáma
      */
     public boolean addMember(String name, String dob, String phone) {
-        if (isValidMemberInput(name, dob, phone)) {
+        if (ValidityChecker.isValidMemberInput(name, dob, phone)) {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate dateOfBirth = LocalDate.parse(dob, dateFormatter);
             Member member = new Member(name, dateOfBirth, phone);
@@ -302,7 +261,7 @@ public class Library implements Serializable {
      * @return Igaz, ha a módosítást sikerült végrehajtani
      */
     public boolean editMember(Member member, String name, String dob, String phone) {
-        if (isValidMemberInput(name, dob, phone)) {
+        if (ValidityChecker.isValidMemberInput(name, dob, phone)) {
             member.setName(name);
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             member.setDateOfBirth(LocalDate.parse(dob, dateFormatter));
