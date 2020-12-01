@@ -13,14 +13,17 @@ public class LibrarySerializationTest {
         this.library = new Library();
     }
 
+    // beolvas egy adatfájlt, és ellenőrzi, hogy visszakaptuk-e a várt értékeket
     @Test
     public void read() {
         this.library.initTransientVariables("serializationTestRead.libdat");
         this.library = Library.readDataFromFile(library);
         Assert.assertEquals(1, library.getBooks().size());
         Assert.assertEquals("Harry Potter és a Titkok Kamrája", library.getBooks().get(0).getTitle());
+        Assert.assertEquals("J. K. Rowling", library.getBooks().get(0).getAuthor());
     }
 
+    // kiír egy adatfájlt, majd visszaolvassa, hogy az adatok egyeznek-e
     @Test
     public void write() {
         this.library.initTransientVariables("serializationTestWrite.libdat");

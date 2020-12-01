@@ -56,12 +56,14 @@ public class LibraryTest {
         Assert.assertEquals(0, library.getBooks().size());
     }
 
+    // teszteli, hogy sikerült-e hozzáadni egy tagot
     @Test
     public void addMember() {
         Assert.assertTrue(library.addMember("Kiss Ferenc", "2000-01-01", "06301234567"));
         Assert.assertEquals(1, library.getMembers().size());
     }
 
+    // teszteli a tag adatainak szerkesztését
     @Test
     public void editMember() {
         library.addMember("Kiss Ferenc", "2000-01-01", "06301234567");
@@ -72,6 +74,7 @@ public class LibraryTest {
                 member.getPhone().equals("06201234567"));
     }
 
+    // teszteli, hogy a program helyesen kezeli-e, ha a tag adatainak szerkesztésekor érvénytelen adatokat adunk meg
     @Test
     public void editMemberInvalidArguments() {
         library.addMember("Kiss Ferenc", "2000-01-01", "06301234567");
@@ -82,6 +85,7 @@ public class LibraryTest {
                 member.getPhone().equals("telefonszám"));
     }
 
+    // egy tag törlését teszteli
     @Test
     public void removeMember() {
         library.addMember("Kiss Ferenc", "2000-01-01", "06301234567");
@@ -89,6 +93,7 @@ public class LibraryTest {
         Assert.assertEquals(0, library.getMembers().size());
     }
 
+    // egy könyv kölcsönzését teszteli
     @Test
     public void borrow() {
         Member member = new Member("Kovács István", LocalDate.of(1947, 10, 2), "06701234567");
