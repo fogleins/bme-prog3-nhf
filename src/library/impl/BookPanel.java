@@ -10,37 +10,37 @@ public class BookPanel extends JPanel {
     /**
      * Az adatok megadásának panele.
      */
-    private JPanel mainPanel;
+    private final JPanel mainPanel;
 
     /**
      * A könyv szerzőjének megadására szolgáló szövegmező.
      */
-    private JTextField author;
+    private final JTextField author;
 
     /**
      * A könyv címének szövegmezője.
      */
-    private JTextField title;
+    private final JTextField title;
 
     /**
      * A könyv kiadási évének szövegmezője.
      */
-    private JTextField year;
+    private final JTextField year;
 
     /**
      * A könyv kategóriájának megadását lehetővé tevő legördülő menü.
      */
-    private JComboBox<String> category;
+    private final JComboBox<String> category;
 
     /**
      * A könyv nyelvének szövegmezője.
      */
-    private JTextField language;
+    private final JTextField language;
 
     /**
      * A kölcsönözhetőség igaz értékét képviselő RadioButton.
      */
-    private JRadioButton yes;
+    private final JRadioButton yes;
 
 
     /**

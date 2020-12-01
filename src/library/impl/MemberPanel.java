@@ -14,22 +14,22 @@ class MemberPanel extends JPanel {
     /**
      * Az adatok megadásának panele.
      */
-    private JPanel mainPanel;
+    private final JPanel mainPanel;
 
     /**
      * A tag nevének szövegmezője.
      */
-    private JTextField name;
+    private final JTextField name;
 
     /**
      * A tag születési idejének szövegmezője.
      */
-    private JFormattedTextField dateOfBirth;
+    private final JFormattedTextField dateOfBirth;
 
     /**
      * A tag telefonszámának szövegmezője.
      */
-    private JTextField phone;
+    private final JTextField phone;
 
     /**
      * Létrehoz egy tagok adatainak megadását lehetővé tevő panelt és inicializálja a komponenseit.
