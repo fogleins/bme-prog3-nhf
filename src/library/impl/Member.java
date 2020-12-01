@@ -9,6 +9,12 @@ import java.util.List;
  * Könyvtári tagot megvalósító osztály.
  */
 public class Member implements Serializable {
+
+    /**
+     * A szerializációhoz használt egyedi osztályazonosító.
+     */
+    private static final long serialVersionUID = 5796688182502854713L;
+
     /**
      * A tag neve.
      */
@@ -32,7 +38,7 @@ public class Member implements Serializable {
     /**
      * A tag által kikölcsönzött könyvek listája.
      */
-    private List<Book> borrowedBooks;
+    private final List<Book> borrowedBooks;
 
 
     /**

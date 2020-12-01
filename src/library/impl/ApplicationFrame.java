@@ -12,7 +12,7 @@ import java.awt.event.*;
 import static java.awt.event.InputEvent.CTRL_DOWN_MASK;
 
 /**
- * A program ablaka.
+ * A program fő ablaka. Beállítja és megjeleníti a felhasználói felület elemeit.
  */
 public class ApplicationFrame extends JFrame {
 
@@ -96,13 +96,10 @@ public class ApplicationFrame extends JFrame {
         this.pack();
     }
 
+    /**
+     * A program belépési pontja.
+     */
     public static void main(String[] args) {
-//        try {
-//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-//        }
-//        catch (Exception e) {
-//            System.out.println("err");
-//        }
         ApplicationFrame frame = new ApplicationFrame();
         frame.setVisible(true);
     }
@@ -246,7 +243,7 @@ public class ApplicationFrame extends JFrame {
     }
 
     /**
-     * Létrehozza, beállítja és az ablakhoz adja a menüsort
+     * Létrehozza, beállítja és az ablakhoz adja a menüsort.
      */
     private void initMenuBar() {
         JMenuBar menuBar = new JMenuBar();
@@ -401,7 +398,6 @@ public class ApplicationFrame extends JFrame {
         bookTable.setDefaultRenderer(Member.class, new BookTableCellRenderer(bookTable.getDefaultRenderer(Member.class)));
 
         bookTable.setRowHeight(20);
-        // TODO: https://stackoverflow.com/questions/13192419/setting-a-tooltip-for-a-value-from-jcomboboxs-items-as-celleditor-in-jtable
     }
 
     /**
@@ -491,14 +487,13 @@ public class ApplicationFrame extends JFrame {
     }
 
     /**
-     * Beállítja azokat a {@code CellEditor}-okat, amiknek JComboBox-szal lehet megadni az értékét
+     * Beállítja azokat a {@code CellEditor}-okat, amiknek {@code JComboBox}-szal lehet megadni az értékét a könyvek táblázatában.
      */
     private void initCellEditors() {
-        // book table
         // kölcsönző JComboBox-szal való megadásához
         TableColumn memberColumn = bookTable.getColumnModel().getColumn(6);
         JComboBox<Member> memberComboBox = this.library.getMemberData().getMembersComboBox();
-        memberComboBox.insertItemAt(null, 0); // ha korábban ki volt kölcsönözve, akkor a null-t választva lehet "visszavinni" TODO: gombbal is lehessen
+        memberComboBox.insertItemAt(null, 0); // ha korábban ki volt kölcsönözve, akkor a null-t választva lehet visszavinni
         memberColumn.setCellEditor(new DefaultCellEditor(memberComboBox));
 
         // kategória JComboBox-szal való megadásához

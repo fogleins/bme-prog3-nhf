@@ -12,7 +12,7 @@ public enum BookCategory {
     OTHER;
 
     /**
-     * Visszaadja a kategória magyar nevét {@code String}-ként
+     * Visszaadja a kategória magyar nevét {@code String}-ként.
      *
      * @param locale A nyelv ISO 639-1 kódja, csupa nagybetűvel
      * @return A kategória neve a megadott nyelven, ha az adott nyelven elérhető. Ha nem, visszaadja az angol nevét.
@@ -34,8 +34,9 @@ public enum BookCategory {
 
     /**
      * Visszaadja a lokalizált stringhez tartozó értéket.
+     *
      * @param localizedName A string lokalizált értéke
-     * @param fromLocale A forrásnyelv ISO 639-1 kódja, csupa nagybetűvel
+     * @param fromLocale    A forrásnyelv ISO 639-1 kódja, csupa nagybetűvel
      * @return A paraméterül kapott {@code String}-hez tartozó {@code BookCategory} érték. Ha a megadott nyelvre a függvény
      * nincs implementálva, a függvény {@code null} értékkel tér vissza.
      */

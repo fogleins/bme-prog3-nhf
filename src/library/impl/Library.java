@@ -9,9 +9,14 @@ import java.util.*;
 import java.util.List;
 
 /**
- * A tárolt adatokat összefogó osztály.
+ * A tárolt adatokat összefogó osztály. Ez az osztály kezeli a szerializációt és a deszerializációt.
  */
 public class Library implements Serializable {
+    /**
+     * A szerializációhoz használt egyedi osztályazonosító.
+     */
+    private static final long serialVersionUID = -1853243014428699673L;
+
     /**
      * A tárolt könyvek listája.
      */
@@ -186,9 +191,9 @@ public class Library implements Serializable {
             JOptionPane.showMessageDialog(null, "A megnyitni kívánt fájl sérült. Hibaüzenet: " + streamCorruptedException.getMessage(),
                     "A fájl nem található", JOptionPane.ERROR_MESSAGE);
             System.exit(-1);
-        } catch (Exception exception) { // IOException vagy ClassNotFoundException
+        } catch (Exception exception) { // IOException, ClassNotFoundException vagy InvalidClassException
             JOptionPane.showMessageDialog(null, "Hiba a fájl beolvasása során. A program bezáródik. " +
-                    "Hibaüzenet: " + exception.getMessage(), "A fájl nem található", JOptionPane.ERROR_MESSAGE);
+                    "Hibaüzenet: " + exception.getMessage(), "Hiba a beolvasni kívánt fájlban", JOptionPane.ERROR_MESSAGE);
             System.exit(-1);
         }
         return library;

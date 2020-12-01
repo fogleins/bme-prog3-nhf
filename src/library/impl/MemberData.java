@@ -9,6 +9,12 @@ import java.util.List;
  * A tagokat megjelenítő táblázat modellje.
  */
 public class MemberData extends AbstractTableModel {
+
+    /**
+     * A szerializációhoz használt egyedi osztályazonosító.
+     */
+    private static final long serialVersionUID = -6927852408055147036L;
+
     /**
      * A tagok listája.
      */

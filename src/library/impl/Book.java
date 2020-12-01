@@ -8,6 +8,11 @@ import java.io.Serializable;
 public class Book implements Serializable {
 
     /**
+     * A szerializációhoz használt egyedi osztályazonosító.
+     */
+    private static final long serialVersionUID = 2313621965652786532L;
+
+    /**
      * A könyv szerzője.
      */
     private String author;

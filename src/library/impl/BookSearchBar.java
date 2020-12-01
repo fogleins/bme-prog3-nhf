@@ -6,7 +6,7 @@ import java.awt.event.FocusListener;
 import java.util.List;
 
 /**
- * A keresés szövegmezőt reprezentáló osztály.
+ * A keresés szövegmezőt reprezentáló osztály. Ha változik a tárolt könyvek száma, frissíti a helykitöltő szöveget.
  */
 public class BookSearchBar extends JTextField {
     private String placeholderText;
@@ -32,7 +32,7 @@ public class BookSearchBar extends JTextField {
      */
     public void setBooks(List<Book> books) {
         this.books = books;
-        update();
+        this.update();
     }
 
     /**

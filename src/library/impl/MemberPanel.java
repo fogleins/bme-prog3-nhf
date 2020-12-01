@@ -8,7 +8,7 @@ import java.awt.event.FocusEvent;
 import java.text.ParseException;
 
 /**
- * Létrehoz egy tagok adatai megadását lehetővé tevő panelt a szükséges komponensekkel és lehetővé teszi a komponensek későbbi elérését és szerkesztését.
+ * Létrehoz egy tag adatainak megadását lehetővé tevő panelt a szükséges komponensekkel és lehetővé teszi a komponensek későbbi elérését és szerkesztését.
  */
 class MemberPanel extends JPanel {
     /**
@@ -63,7 +63,7 @@ class MemberPanel extends JPanel {
         });
         this.phone = new JTextField(10);
 
-        // a TextField-ek margóját kicsit megnöveljük, ez nagyban segíti a dátum helyes megadását, ugyanis alapértelmezetten
+        // a TextField-ek margóját kicsit megnöveljük, ez segíti a dátum helyes megadását, ugyanis alapértelmezetten
         // a margók elég keskenyek (0), és a születési dátum megadásakor könnyű nem az első indexre helyezni a kurzort,
         // az így beírt adatokat viszont a MaskFormatter nem tekinti érvényesnek, mert az csak számokat tartalmazhat, szóközöket nem
         this.name.setMargin(new Insets(0, 3, 0, 5));

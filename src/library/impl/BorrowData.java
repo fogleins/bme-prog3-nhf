@@ -5,9 +5,15 @@ import javax.swing.tree.DefaultTreeModel;
 import java.util.List;
 
 /**
- * A kölcsönzéseket megjelenítő {@code JTable} modellje.
+ * A kölcsönzéseket megjelenítő {@code JTree} modellje.
  */
 public class BorrowData extends DefaultTreeModel {
+
+    /**
+     * A szerializációhoz használt egyedi osztályazonosító.
+     */
+    private static final long serialVersionUID = 6143222816868479628L;
+
     /**
      * A könyvtári tagok listája.
      */

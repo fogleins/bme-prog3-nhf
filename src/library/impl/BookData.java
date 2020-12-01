@@ -10,6 +10,12 @@ import java.util.List;
  * A könyveket megjelenítő táblázat modellje.
  */
 public class BookData extends AbstractTableModel {
+
+    /**
+     * A szerializációhoz használt egyedi osztályazonosító.
+     */
+    private static final long serialVersionUID = 2640480992917852652L;
+
     /**
      * A megjelenítendő könyvek listája.
      */
@@ -148,32 +154,40 @@ public class BookData extends AbstractTableModel {
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         Book selectedBook = books.get(rowIndex);
-        if (columnIndex == 0) {
-            String author = (String) aValue;
-            if (!author.equals(""))
-                selectedBook.setAuthor(author);
-        } else if (columnIndex == 1) {
-            String title = (String) aValue;
-            if (!title.equals(""))
-                selectedBook.setTitle(title);
-        } else if (columnIndex == 2) {
-            int year = (Integer) aValue;
-            if (year != 0)
-                selectedBook.setYearOfPublication(year);
-        } else if (columnIndex == 3)
-            selectedBook.setCategory((BookCategory.valueOf((String) aValue, "HU")));
-        else if (columnIndex == 4) {
-            String lang = (String) aValue;
-            if (!lang.equals(""))
-                selectedBook.setLanguage(lang.toLowerCase());
-        } else if (columnIndex == 5) {
-            BorrowManager.borrowableChanged(selectedBook, aValue);
-            fireTableDataChanged();
-        } else if (columnIndex == 6) {
-            if (selectedBook.isBorrowable()) {
-                BorrowManager.borrowedByChanged(selectedBook, aValue);
+        switch (columnIndex) {
+            case 0:
+                String author = (String) aValue;
+                if (!author.equals(""))
+                    selectedBook.setAuthor(author);
+                break;
+            case 1:
+                String title = (String) aValue;
+                if (!title.equals(""))
+                    selectedBook.setTitle(title);
+                break;
+            case 2:
+                int year = (Integer) aValue;
+                if (year != 0)
+                    selectedBook.setYearOfPublication(year);
+                break;
+            case 3:
+                selectedBook.setCategory((BookCategory.valueOf((String) aValue, "HU")));
+                break;
+            case 4:
+                String lang = (String) aValue;
+                if (!lang.equals(""))
+                    selectedBook.setLanguage(lang.toLowerCase());
+                break;
+            case 5:
+                BorrowManager.borrowableChanged(selectedBook, aValue);
                 fireTableDataChanged();
-            }
+                break;
+            case 6:
+                if (selectedBook.isBorrowable()) {
+                    BorrowManager.borrowedByChanged(selectedBook, aValue);
+                    fireTableDataChanged();
+                }
+                break;
         }
     }
 
