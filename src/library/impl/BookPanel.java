@@ -6,7 +6,7 @@ import java.awt.*;
 /**
  * Létrehoz egy könyv adatainak megadását lehetővé tevő panelt a szükséges komponensekkel és lehetővé teszi a komponensek értékeinek későbbi elérését.
  */
-public class BookPanel extends JPanel {
+class BookPanel extends JPanel {
     /**
      * Az adatok megadásának panele.
      */

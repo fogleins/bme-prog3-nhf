@@ -18,12 +18,12 @@ public class MemberData extends AbstractTableModel {
     /**
      * A tagok listája.
      */
-    List<Member> members;
+    private final List<Member> members;
 
     /**
      * A tagokat tartalmazó {@code JComboBox} objektum.
      */
-    JComboBox<Member> membersComboBox;
+    private final JComboBox<Member> membersComboBox;
 
     /**
      * Konstruktor

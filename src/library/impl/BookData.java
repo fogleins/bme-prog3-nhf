@@ -19,7 +19,7 @@ public class BookData extends AbstractTableModel {
     /**
      * A megjelenítendő könyvek listája.
      */
-    List<Book> books;
+    private final List<Book> books;
 
     /**
      * Konstruktor

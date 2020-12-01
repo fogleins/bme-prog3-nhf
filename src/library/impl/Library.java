@@ -211,14 +211,14 @@ public class Library implements Serializable {
         if (!searchInAuthor) {
             bookFilter = new RowFilter<>() {
                 public boolean include(Entry<? extends BookData, ? extends Integer> entry) {
-                    Book book = bookData.books.get(entry.getIdentifier());
+                    Book book = books.get(entry.getIdentifier());
                     return book.getTitle().contains(searchFor);
                 }
             };
         } else {
             bookFilter = new RowFilter<>() {
                 public boolean include(Entry<? extends BookData, ? extends Integer> entry) {
-                    Book book = bookData.books.get(entry.getIdentifier());
+                    Book book = books.get(entry.getIdentifier());
                     return book.getTitle().contains(searchFor) || book.getAuthor().contains(searchFor);
                 }
             };

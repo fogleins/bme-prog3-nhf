@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * A keresés szövegmezőt reprezentáló osztály. Ha változik a tárolt könyvek száma, frissíti a helykitöltő szöveget.
  */
-public class BookSearchBar extends JTextField {
+class BookSearchBar extends JTextField {
     private String placeholderText;
     private List<Book> books;
 
@@ -57,7 +57,7 @@ public class BookSearchBar extends JTextField {
      * akkor beállítjuk a placeholder szöveget, ha a mező fókuszba kerül, akkor pedig eltávolítjuk azt. A felhasználó által
      * bevitt szöveget nem írja felül.
      */
-    class BookSearchBarFocusListener implements FocusListener {
+    private class BookSearchBarFocusListener implements FocusListener {
         @Override
         public void focusGained(FocusEvent e) {
             if (BookSearchBar.this.getText().equals(placeholderText))

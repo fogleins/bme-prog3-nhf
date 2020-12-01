@@ -7,7 +7,7 @@ import java.time.format.DateTimeParseException;
 /**
  * Ellenőrzi, hogy egy adott input megfelel-e az objektum létrehozásához szükséges formátumoknak.
  */
-public class ValidityChecker {
+class ValidityChecker {
     /**
      * Ellenőrzi, hogy a paraméterül kapott adatok lehetnek-e egy könyv adatai.
      *
