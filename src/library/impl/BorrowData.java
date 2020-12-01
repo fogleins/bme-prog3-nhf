@@ -23,35 +23,56 @@ public class BorrowData extends DefaultTreeModel {
         this.members = members;
     }
 
+    /**
+     * Visszaadja a fa gyökerét.
+     *
+     * @return A fa gyökere
+     */
     @Override
     public Object getRoot() {
         return this.root;
     }
 
+    /**
+     * Visszaadja egy adott csomópont gyerekét.
+     *
+     * @param parent A szülő
+     * @param index  A szülő keresett gyerekének az indexe
+     * @return A paraméterként kapott szülő gyereke
+     */
     @Override
     public Object getChild(Object parent, int index) {
         if (parent == root)
             return this.members.get(index);
-        else /*if (members.contains(parent))*/ { // TODO
+        else {
             Member member = ((Member) parent);
             Book book = member.getBorrowedBooks().get(index);
             return book.getAuthor() + ": " + book.getTitle();
         }
-//        return null; // TODO
     }
 
+    /**
+     * Visszaadja a szülő gyerekeinek számát.
+     *
+     * @param parent A szülő
+     * @return A gyerekek száma
+     */
     @Override
     public int getChildCount(Object parent) {
         if (parent == root)
             return this.members.size();
-//        else if (members.contains(parent)) // TODO
         return ((Member) parent).getBorrowedBooks().size();
-//        return 0; // todo
     }
 
+    /**
+     * Visszaadja, hogy egy adott csomópont levél-e.
+     *
+     * @param node A csomópont, amiről meg szeretnénk tudni, hogy levél-e
+     * @return Igaz, ha a csomópont levél, egyébként hamis
+     */
     @Override
     public boolean isLeaf(Object node) {
-        if (members.contains(node)) // ha Member
+        if (members.contains(node))
             return ((Member) node).getBorrowedBooks().size() == 0;
         else // ha root, akkor hamis, ha nem az (tehát könyv), akkor igaz
             return node != root;

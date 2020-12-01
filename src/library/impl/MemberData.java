@@ -3,7 +3,6 @@ package library.impl;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,14 +18,6 @@ public class MemberData extends AbstractTableModel {
      * A tagokat tartalmazó {@code JComboBox} objektum.
      */
     JComboBox<Member> membersComboBox;
-
-    /**
-     * Konstruktor
-     */
-    public MemberData() {
-        this.members = new ArrayList<>();
-        this.membersComboBox = new JComboBox<>(); // TODO: initComboBox() biztosan nem kell?
-    }
 
     /**
      * Konstruktor

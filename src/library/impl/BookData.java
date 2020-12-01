@@ -127,26 +127,6 @@ public class BookData extends AbstractTableModel {
     }
 
     /**
-     * Felvesz egy könyvet a programba.
-     *
-     * @param book A felveendő könyv
-     */
-    public void addBook(Book book) {
-        books.add(book);
-        fireTableDataChanged();
-    }
-
-    /**
-     * Eltávolít egy könyvet a programból.
-     *
-     * @param book Az eltávolítandó könyv
-     */
-    public void removeBook(Book book) {
-        books.remove(book);
-        fireTableDataChanged();
-    }
-
-    /**
      * Visszaadja, hogy egy adott cella szerkeszthető-e.
      *
      * @param rowIndex    A cella sora
@@ -195,6 +175,26 @@ public class BookData extends AbstractTableModel {
                 fireTableDataChanged();
             }
         }
+    }
+
+    /**
+     * Felvesz egy könyvet a programba.
+     *
+     * @param book A felveendő könyv
+     */
+    public void addBook(Book book) {
+        books.add(book);
+        fireTableDataChanged();
+    }
+
+    /**
+     * Eltávolít egy könyvet a programból.
+     *
+     * @param book Az eltávolítandó könyv
+     */
+    public void removeBook(Book book) {
+        books.remove(book);
+        fireTableDataChanged();
     }
 
     /**
