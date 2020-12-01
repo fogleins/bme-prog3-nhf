@@ -31,16 +31,33 @@ public class BookData extends AbstractTableModel {
         this.books = books;
     }
 
+    /**
+     * Visszaadja a táblázat oszlopainak számát.
+     *
+     * @return A táblázat oszlopainak száma
+     */
     @Override
     public int getColumnCount() {
         return 7;
     }
 
+    /**
+     * Visszaadja a táblázat sorainak a számát.
+     *
+     * @return A táblázat sorainak száma
+     */
     @Override
     public int getRowCount() {
         return this.books.size();
     }
 
+    /**
+     * Visszaadja a táblázat egy adott cellájában lévő értéket.
+     *
+     * @param rowIndex    A sor indexe
+     * @param columnIndex Az oszlop indexe
+     * @return A paraméterként kapott sor- és oszlopindex által megadott cella értéke
+     */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Book book = books.get(rowIndex);
@@ -65,6 +82,12 @@ public class BookData extends AbstractTableModel {
         }
     }
 
+    /**
+     * Visszaadja a táblázat egy oszlopának a fejlécében megjelenítendő szöveget.
+     *
+     * @param column Az oszlop, amelynek a nevét szeretnénk megtudni
+     * @return Az adott oszlop neve
+     */
     @Override
     public String getColumnName(int column) {
         switch (column) {
@@ -85,6 +108,12 @@ public class BookData extends AbstractTableModel {
         }
     }
 
+    /**
+     * Visszaadja, hogy a táblázat egy adott oszlopa milyen típusú adatokat jelenít meg.
+     *
+     * @param columnIndex Az oszlop, amelynek a típusát szeretnénk lekérdezni
+     * @return A paraméterként kapott oszlopban megjelenített adatok típusa
+     */
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         switch (columnIndex) {
@@ -117,11 +146,25 @@ public class BookData extends AbstractTableModel {
         fireTableDataChanged();
     }
 
+    /**
+     * Visszaadja, hogy egy adott cella szerkeszthető-e.
+     *
+     * @param rowIndex    A cella sora
+     * @param columnIndex A cella oszlopa
+     * @return Igaz, ha a cella szerkeszthető
+     */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return true;
     }
 
+    /**
+     * Beállítja a paraméterül kapott cella értékét.
+     *
+     * @param aValue      Az érték, amit be szeretnénk állítani a cellában
+     * @param rowIndex    A cella sora
+     * @param columnIndex A cella oszlopa
+     */
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         Book selectedBook = books.get(rowIndex);

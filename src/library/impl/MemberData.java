@@ -39,16 +39,33 @@ public class MemberData extends AbstractTableModel {
         initComboBox();
     }
 
+    /**
+     * Visszaadja a táblázat oszlopainak számát.
+     *
+     * @return A táblázat oszlopainak száma
+     */
     @Override
     public int getColumnCount() {
         return 4;
     }
 
+    /**
+     * Visszaadja a táblázat sorainak számát.
+     *
+     * @return A táblázat sorainak száma
+     */
     @Override
     public int getRowCount() {
         return members.size();
     }
 
+    /**
+     * Visszaadja a táblázat egy adott cellájának értékét.
+     *
+     * @param rowIndex    A cella sora
+     * @param columnIndex A cella oszlopa
+     * @return A cella értéke
+     */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Member member = members.get(rowIndex);
@@ -64,6 +81,12 @@ public class MemberData extends AbstractTableModel {
         }
     }
 
+    /**
+     * Visszaadja a táblázat egy oszlopának a fejlécében megjelenítendő szöveget.
+     *
+     * @param column Az oszlop, aminek lekérdezzük a nevét
+     * @return A paraméterül kapott oszlop neve
+     */
     @Override
     public String getColumnName(int column) {
         switch (column) {
@@ -78,6 +101,12 @@ public class MemberData extends AbstractTableModel {
         }
     }
 
+    /**
+     * Visszaadja, hogy a táblázat egy adott oszlopa milyen típusú adatokat jelenít meg.
+     *
+     * @param columnIndex Az oszlop, amelynek a típusát szeretnénk lekérdezni
+     * @return A paraméterként kapott oszlopban megjelenített adatok típusa
+     */
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         if (columnIndex == 1 || columnIndex == 3)
@@ -85,6 +114,13 @@ public class MemberData extends AbstractTableModel {
         return String.class;
     }
 
+    /**
+     * Beállítja a paraméterül kapott cella értékét.
+     *
+     * @param aValue      Az érték, amit be szeretnénk állítani a cellában
+     * @param rowIndex    A cella sora
+     * @param columnIndex A cella oszlopa
+     */
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         if (columnIndex == 0) {
@@ -98,6 +134,13 @@ public class MemberData extends AbstractTableModel {
         }
     }
 
+    /**
+     * Visszaadja, hogy egy cella szerkeszthető-e.
+     *
+     * @param rowIndex    A cella sora
+     * @param columnIndex A cella oszlopa
+     * @return Igaz, ha a cella szerkeszthető, egyébként hamis
+     */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return false;

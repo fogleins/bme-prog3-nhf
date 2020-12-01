@@ -112,6 +112,11 @@ public class Member implements Serializable {
         return borrowedBooks;
     }
 
+    /**
+     * Visszaadja a tag adatait tartalmazó {@code String}-et.
+     *
+     * @return A tag neve, születési ideje, telefonszáma és a kölcsönzött könyvek száma, {@code String}-ként
+     */
     @Override
     public String toString() {
         return name + " (" + dateOfBirth + ", " + phone + "): " + borrowedBooks.size() + " könyv";

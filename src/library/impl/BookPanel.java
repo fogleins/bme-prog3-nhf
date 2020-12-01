@@ -3,6 +3,9 @@ package library.impl;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Létrehoz egy könyv adatainak megadását lehetővé tevő panelt a szükséges komponensekkel és lehetővé teszi a komponensek értékeinek későbbi elérését.
+ */
 public class BookPanel extends JPanel {
     /**
      * Az adatok megadásának panele.
@@ -86,6 +89,8 @@ public class BookPanel extends JPanel {
     }
 
     /**
+     * Visszaadja a főpanelt.
+     *
      * @return A főpanel
      */
     public JPanel getMainPanel() {
@@ -93,6 +98,8 @@ public class BookPanel extends JPanel {
     }
 
     /**
+     * Visszaadja a szerző szövegmezőben megadott értéket.
+     *
      * @return A szerző szövegmező értéke
      */
     public String getAuthor() {
@@ -100,6 +107,8 @@ public class BookPanel extends JPanel {
     }
 
     /**
+     * Visszaadja a cím szövegmezőben megadott értéket.
+     *
      * @return A cím szövegmező értéke
      */
     public String getTitle() {
@@ -107,6 +116,8 @@ public class BookPanel extends JPanel {
     }
 
     /**
+     * Visszaadja az év szövegmezőben megadott értéket.
+     *
      * @return A kiadási év szövegmező értéke
      */
     public String getYear() {
@@ -114,6 +125,8 @@ public class BookPanel extends JPanel {
     }
 
     /**
+     * Visszaadja a kategória ComboBox-ban kiválasztott értéket.
+     *
      * @return A kiválasztott kategória
      */
     public String getCategory() {
@@ -121,6 +134,8 @@ public class BookPanel extends JPanel {
     }
 
     /**
+     * Visszaadja a könyv nyelvének szövegmezőjében megadott értéket.
+     *
      * @return A könyv nyelve
      */
     public String getLanguage() {
@@ -128,6 +143,8 @@ public class BookPanel extends JPanel {
     }
 
     /**
+     * Visszaadja, hogy a könyvet kölcsönözhetőre állították-e.
+     *
      * @return A könyv kölcsönözhetősége
      */
     public boolean isBorrowable() {

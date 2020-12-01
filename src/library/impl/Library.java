@@ -46,26 +46,56 @@ public class Library implements Serializable {
         this.members = new ArrayList<>();
     }
 
+    /**
+     * Visszaadja a könyveket tartalmazó listát.
+     *
+     * @return A könyveket tartalmazó lista
+     */
     public List<Book> getBooks() {
         return books;
     }
 
+    /**
+     * Visszaadja a tagokat tartalmazó listát.
+     *
+     * @return A tagokat tartalmazó lista.
+     */
     public List<Member> getMembers() {
         return members;
     }
 
+    /**
+     * Visszaadja a könyveket tartalmazó táblázat modelljét.
+     *
+     * @return A könyveket tartalmazó táblázat modellje
+     */
     public BookData getBookData() {
         return bookData;
     }
 
+    /**
+     * Visszaadja a tagokat tartalmazó táblázat modelljét.
+     *
+     * @return A tagokat tartalmazó táblázat modellje
+     */
     public MemberData getMemberData() {
         return memberData;
     }
 
+    /**
+     * Visszaadja az adatok mentésének elérési útját.
+     *
+     * @return Az adatok mentésének elérési útja
+     */
     public String getSerializationPath() {
         return serializationPath;
     }
 
+    /**
+     * Beállítja az adatmentés helyét.
+     *
+     * @param serializationPath Az új elérési út
+     */
     public void setSerializationPath(String serializationPath) {
         this.serializationPath = serializationPath;
     }

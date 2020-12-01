@@ -44,6 +44,7 @@ public class BookSearchBar extends JTextField {
     }
 
     /**
+     * Visszaadja az aktuális helykitöltő szöveget.
      *
      * @return A jelenlegi placeholder szöveg.
      */

@@ -76,14 +76,18 @@ class MemberPanel extends JPanel {
     }
 
     /**
-     * @return A főpanel.
+     * Visszaadja a főpanelt.
+     *
+     * @return A főpanel
      */
     public JPanel getMainPanel() {
         return mainPanel;
     }
 
     /**
-     * @return A név megadására szolgáló TextField tartalma.ű
+     * Visszaadja a név szövegmezőben megadott értéket.
+     *
+     * @return A név megadására szolgáló TextField tartalma
      */
     public String getNameValue() {
         return name.getText();
@@ -99,6 +103,8 @@ class MemberPanel extends JPanel {
     }
 
     /**
+     * Visszaadja a születési idő mezőben megadott értéket.
+     *
      * @return A születési év TextField értéke
      */
     public String getDateOfBirthValue() {
@@ -115,6 +121,8 @@ class MemberPanel extends JPanel {
     }
 
     /**
+     * Visszaadja a telefonszám szövegmezőben megadott értéket.
+     *
      * @return A telefonszám TextField értéke
      */
     public String getPhoneValue() {
