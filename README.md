@@ -20,6 +20,6 @@ Részletesebb leírások a [Dokumentációk](https://github.com/fogleins/bme-pro
 * [Specifikáció](./docs/specifikacio.pdf "Specifikáció")
 
 ## Képernyőképek
-![alt text](./docs/fokepernyo.png "Főképernyő")
+![Főképernyő](./docs/fokepernyo.png "Főképernyő")
 
-![alt text](./docs/szerkesztes.png "Egy tag adatainak szerkesztése")
+![Tag adatainak szerkesztése](./docs/szerkesztes.png "Egy tag adatainak szerkesztése")
